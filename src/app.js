@@ -262,9 +262,9 @@ var app = (function(){
 			timeSpeed: function() {
 				return canvas.state.timeSpeed;
 			},
-			// timePlay: function() {
-			// 	return canvas.state.play ? 'Pause' : 'Play';
-			// }
+			timePlay: function() {
+				return canvas.state.play ? 'Pause' : 'Play';
+			}
 		}
 
 		var update = function(key) {
