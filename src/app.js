@@ -187,7 +187,7 @@ var app = (function(){
 			var timeSpeed = canvas.state.timeSpeed * times;
 			if (timeSpeed < 1) timeSpeed = 1;
 			if (timeSpeed > 1000000) timeSpeed = 1000000;
-			canvas.state.timeSpeed = timeSpeed;
+			canvas.state.timeSpeed = parseInt(timeSpeed);
 			panel.update('timeSpeed');
 		}
 
