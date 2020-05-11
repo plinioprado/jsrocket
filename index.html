@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+<html>
+  <head>
+    <meta charset="utf-8">
+		<title>jsrocket2</title>
+		<link rel="stylesheet" href="index2.css">
+		<link rel="stylesheet" href="panel.css">
+  </head>
+  <body>
+		<main id="canvas" class="canvas" >
+			<menu><a href="help.html">Help</a></menu>
+		</main>
+		<aside id="panel" class="panel">
+			<section>
+				<label>Nav</label>
+				<div>Alt: <span id="alt">&nbsp;</span></div>
+				<div>Climb: <span id="climb">&nbsp;</span></div>
+				<div>Long: <span id="long">&nbsp;</span></div>
+				<div>VHoriz: <span id="vHoriz">&nbsp;</span></div>
+			</section>
+			<section id="fdai">
+				<label>FDAI</label>
+				<div>Speed: <span id="speed">&nbsp;</span></div>
+				<div>Head: <span id="head">&nbsp;</span></div>
+				<div>Pitch: <span id="pitch">&nbsp;</span></div>
+			</section>
+			<section id="Thrust">
+				<label>Trust (Next)</label>
+				<div>Thrust: <span id="burstA">&nbsp;</span></div>
+				<div>Time: <span id="burstT">&nbsp;</span></div>
+			</section>
+			<section>
+				<label>View</label>
+				<div>
+					Zoom:
+					<a href="/#/zoomMinus">&#9660;</a>
+					1:<span id="zoom">&nbsp;</span>
+					<a href="/#/zoomPlus">&#9650;</a>
+				</div>
+				<div>
+					Time speed:
+					<a href="/#/timeMinus">&#9660;</a>
+					<span id="timeSpeed">1</span>
+					<a href="/#/timePlus">&#9650;</a>
+				</div>
+				<!--<div><a href="/#/timaPlay" id="timePlay">Pause</a></div>-->
+			</section>
+			<div id="scale" class="scale">&nbsp;</div>
+			<div id="time" class="timer">00:00:00</div>
+		</aside>
+	</body>
+	<script src="./js/app.js"></script>
+</html>

@@ -1,0 +1,98 @@
+.panel {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 20%;
+	height: 100%;
+	background-color: white;
+	z-index: 5;
+}
+
+.panel a:link {
+	color: black;
+	text-decoration: underline;
+}
+
+.panel a:hover {
+	color: darkgray;
+	text-decoration: underline;
+}
+.panel a:visited {
+	color: black;
+	text-decoration: underline;
+}
+
+.panel section {
+	width: 94%;
+	margin: 2%;
+	margin-top: 10px;
+	padding-top: 5%;
+	padding-bottom: 2%;
+	border-style: solid;
+	border-color: grey;
+	border-width: 1px
+}
+
+.panel section label {
+	display: table;
+	background-color: white;
+	margin-top: -10%;
+	margin-left: 2%;
+	padding-left: 2%;
+	padding-right: 2%;
+	font-size: 12px;
+}
+
+.panel section div {
+	height: 20px;
+	margin: 2%;
+	margin-top: 0
+}
+
+#fdic {
+	flex-direction:row;
+}
+
+.pitchouter {
+	width: 30%;
+	height: 50px;
+	text-align: center;
+	background-color: greenyellow;
+	border-color: red;
+	border-style: solid;
+	border-width: 1px;
+}
+
+.pitch {
+	width: 38px;
+	height: 28px;
+	border-radius: 50%;
+	padding-top: 10px;
+	text-align: center;
+	z-index: 2;
+	border-color: gray;
+	border-style: solid;
+	border-width: 1px;
+}
+
+#scale {
+	position: absolute;
+	bottom: 8%;
+	left: -60%;
+	width: 40%;
+	z-index: 3;
+	color: white;
+	border-bottom-color: white;
+	border-bottom-style: solid;
+	text-align: center;
+}
+
+#time {
+	position: absolute;
+	bottom: 4%;
+	left: -90%;
+	width: 100%;
+	z-index: 3;
+	color: white;
+	text-align: center;
+}

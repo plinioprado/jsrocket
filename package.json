@@ -1,0 +1,24 @@
+{
+  "name": "jsrocket",
+  "version": "1.0.0",
+  "description": "Orbital flight simulator",
+  "main": "index.js",
+  "scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "babel src -d js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plinioprado/jsrocket.git"
+  },
+  "author": "Plinio Prado",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/plinioprado/jsrocket/issues"
+  },
+  "homepage": "https://github.com/plinioprado/jsrocket#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
+  }
+}
