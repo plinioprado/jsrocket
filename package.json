@@ -4,8 +4,8 @@
   "description": "Orbital flight simulator",
   "main": "index.js",
   "scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "babel src -d js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d js"
   },
   "repository": {
     "type": "git",
