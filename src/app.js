@@ -184,7 +184,10 @@ var app = (function(){
 		}
 
 		var timeMultiply = function(times) {
-			canvas.state.timeSpeed =  Math.max(canvas.state.timeSpeed * times, 1);
+			var timeSpeed = canvas.state.timeSpeed * times;
+			if (timeSpeed < 1) timeSpeed = 1;
+			if (timeSpeed > 1000000) timeSpeed = 1000000;
+			canvas.state.timeSpeed = timeSpeed;
 			panel.update('timeSpeed');
 		}
 
@@ -246,11 +249,16 @@ var app = (function(){
 			},
 			scale: function() {
 				var scale = canvas.state.width / 10  * canvas.state.zoom;
-				return convMkm(scale);
+				return convMkm(scale);g
 			},
 			time: function() {
-				var d = new Date(0, 0, 0, 0, 0, canvas.state.time, 0);
-				return d.toLocaleTimeString('en-US');
+				var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
+				var d = new Date(0, 0, 0, 0, 0, 0, 0);
+				d.setSeconds(canvas.state.time);
+				var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
+
+				//return days + 'Days ' + hours + 'h' + minutes + 'm' + seconds + 's';
+				return days + 'd ' + d.toLocaleTimeString('en-US', { hour12: false });
 			},
 			head: function() {
 				return convDeg(ship.state.position.vDec);
@@ -260,7 +268,7 @@ var app = (function(){
 				return zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k'; ///
 			},
 			timeSpeed: function() {
-				return canvas.state.timeSpeed;
+				return convKM(canvas.state.timeSpeed);
 			},
 			timePlay: function() {
 				return canvas.state.play ? 'Pause' : 'Play';
@@ -293,6 +301,13 @@ var app = (function(){
 
 		function convMkm(d) {
 			return (d < 1000) ? d + 'm' : d/1000 + 'km';
+		}
+
+		function convKM(d) {
+			var txt = d;
+			if (d >= 1000) txt = parseInt(d/1000) + 'k';
+			else if (d >= 1000000) txt = parseInt(d/1000000) + 'M';
+			return txt;
 		}
 
 		function toDeg180(deg) {
