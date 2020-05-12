@@ -34,13 +34,15 @@ Running locally
 
 ## Stack
 
-Javascript
-HTML5
-CSS3
+Stack
 
-## Contributing
+* Javascript
+* HTML5
+* CSS3 (avoided in the canvas in favor of js dynamic styling)
 
-The code is starting to take it's initial shape, as soon as the code is broken in components it will be open for people to add new ones or new versions of the existing ones.
+Dev tools
+
+* babel
 
 ## License
 

@@ -317,12 +317,12 @@ var app = function(deps){
       climb: function() {
         var vDec = ship.state.position.vDec + ship.state.position.dec;
         var climb = ship.state.position.vR * Math.cos(vDec * (Math.PI/180))
-        return climb.toFixed(0) + 'km/h';
+        return Math.round(climb).toLocaleString('en-US') + 'km/h';
       },
-      vHoriz: function() {
+      vOrbit: function() {
         var vDec = ship.state.position.vDec + ship.state.position.dec;
-        var climb = ship.state.position.vR * Math.sin(vDec * (Math.PI/180))
-        return climb.toFixed(0) + 'km/h';
+        var v = ship.state.position.vR * Math.sin(vDec * (Math.PI/180))
+        return Math.round(v).toLocaleString('en-US') + 'km/h';
       },
       speed: function() {
         return Math.round(ship.state.position.vR * 3.6).toLocaleString('en-US') + 'km/h';
@@ -344,8 +344,6 @@ var app = function(deps){
         var d = new Date(0, 0, 0, 0, 0, 0, 0);
         d.setSeconds(canvas.state.time);
         var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
-
-        //return days + 'Days ' + hours + 'h' + minutes + 'm' + seconds + 's';
         return days + 'd ' + d.toLocaleTimeString('en-US', { hour12: false });
       },
       head: function() {
