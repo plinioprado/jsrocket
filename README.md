@@ -42,7 +42,7 @@ Stack
 
 Dev tools
 
-* babel
+* webpack: bundling
 
 ## License
 

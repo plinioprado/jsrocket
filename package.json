@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src -d js",
-    "watch": "babel src -d js -w"
+		"build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -19,7 +18,7 @@
   },
   "homepage": "https://github.com/plinioprado/jsrocket#readme",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0"
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
   }
 }

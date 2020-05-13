@@ -1,3 +1,5 @@
+import getEarth from './earth';
+
 document.onLoad = loadApp;
 
 var getBase = function() {

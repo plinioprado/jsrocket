@@ -1,4 +1,4 @@
-function getEarth() {
+var getEarth = function() {
   var id = 'earth';
   var state = {
     width: 12756200, // (m)
@@ -20,3 +20,5 @@ function getEarth() {
     state
   }
 }
+
+export default getEarth;

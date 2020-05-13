@@ -1,3 +1,56 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	font-size: 14px;
+	background-color: black;
+}
+
+a {
+	text-decoration: none;
+}
+
+menu {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 3;
+}
+
+menu header a {
+	text-decoration: none;
+	color: white;
+}
+
+menu a:link {
+	color: white;
+}
+
+menu a:visited {
+	color: white;
+}
+
+menu a:hover {
+	color: white;
+	text-decoration: underline;
+}
+
+/* canvas */
+
+#canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 80%;
+	background-color: black;
+	overflow: hidden;
+}
+
+/* Panel */
+
 .panel {
 	position: absolute;
 	top: 0;
@@ -49,32 +102,6 @@
 	margin-top: 0
 }
 
-#fdic {
-	flex-direction:row;
-}
-
-.pitchouter {
-	width: 30%;
-	height: 50px;
-	text-align: center;
-	background-color: greenyellow;
-	border-color: red;
-	border-style: solid;
-	border-width: 1px;
-}
-
-.pitch {
-	width: 38px;
-	height: 28px;
-	border-radius: 50%;
-	padding-top: 10px;
-	text-align: center;
-	z-index: 2;
-	border-color: gray;
-	border-style: solid;
-	border-width: 1px;
-}
-
 #scale {
 	position: absolute;
 	bottom: 8%;
@@ -96,3 +123,5 @@
 	color: white;
 	text-align: center;
 }
+
+
