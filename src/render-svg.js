@@ -32,8 +32,6 @@ let renderSvg = function() {
   }
 
   function createObj(canvasNode, obj) {
-    console.log('will create ' + obj.id + ' as svg');
-
     let canvasSvgNode = getSvgCanvasNode(canvasNode);
     canvasNode.appendChild(canvasSvgNode);
 
@@ -46,8 +44,6 @@ let renderSvg = function() {
   }
 
   function updateObj(canvasNode, obj, zoom, viewCenter) {
-    console.log('will update ' + obj.id + ' as svg');
-
     var node;
     let canvasSvgNode = getSvgCanvasNode(canvasNode);
     for (let i = 0; i < canvasSvgNode.children.length; i++) {

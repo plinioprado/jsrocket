@@ -1,29 +1,9 @@
 import getEarth from './earth';
 import renderSvg from './render-svg';
 import earth2 from './earth2';
+import getBase from './base';
 
 document.onLoad = loadApp;
-
-var getBase = function() {
-  var id = 'base';
-  var state = {
-    width: 100, // mandatory (m)
-    height: 5, // mandatory (m)
-    position: {
-      r: 12756200/2 - 5,
-      dec: 0 // declination (deg)
-    },
-    style: {
-      backgroundColor: 'yellow',
-      zIndex: 4
-    }
-  }
-
-  return {
-    id,
-    state
-  }
-}
 
 var app = function(deps){
 
@@ -506,9 +486,9 @@ var loadApp = (function() {
   var deps = {
     getEarth: getEarth,
     getBase: getBase,
-		renderSvg,
+		renderSvg: renderSvg,
 		objs: {
-			earth2
+			earth2: earth2
 		}
   }
 

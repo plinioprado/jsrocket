@@ -1,11 +1,11 @@
 var earth2 = {
   id: 'earth2',
   renderType: 'svg',
-  r: 6378100,
+	r: 6378100, // m
+	g: 9.80665, // m/s2
   position: {
-    center: 'earth',
-    r: 0,
-    dec: 0
+    r: 0, // r
+    dec: 0 // deg
   },
   render: {
     format: 'circle',

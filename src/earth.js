@@ -1,3 +1,5 @@
+// This data will migrate to the current earth2
+
 var getEarth = function() {
   var id = 'earth';
   var state = {
