@@ -30,8 +30,10 @@ Running locally
 1. Pull to a folder in your computer.
 2. run "$ npm install"
 3. Run local server with "$ npm run start".
-4. Open index.html with Chrome or compatible browser.
+4. Open [http://localhost:9000/] with Chrome or compatible browser.
 5. Read help.html, available in the 'help' menu option on the top left corner.
+
+Source maps available on Chrome Sources in webpack/./src
 
 ## Stack
 
@@ -41,10 +43,11 @@ Stack
 * HTML5
 * CSS3 (avoided in the canvas in favor of js dynamic styling)
 
-Dev tools
+Dev dependencies
 
 * webpack: bundling
-* webpack-dev-server: run locally
+* webpack dev server: run locally
+* babel and babel loader: Transpilling
 
 ## License
 
