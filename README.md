@@ -28,9 +28,10 @@ Running in an existent server:
 Running locally
 
 1. Pull to a folder in your computer.
-2. run "$ npm install" and "$ npm run build".
-3. Open index.html with Chrome or a compatible browser.
-4. Read help.html, available in the 'help' menu option on the top left corner.
+2. run "$ npm install"
+3. Run local server with "$ npm run start".
+4. Open index.html with Chrome or compatible browser.
+5. Read help.html, available in the 'help' menu option on the top left corner.
 
 ## Stack
 
@@ -43,6 +44,7 @@ Stack
 Dev tools
 
 * webpack: bundling
+* webpack-dev-server: run locally
 
 ## License
 
