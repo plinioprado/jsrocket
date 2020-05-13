@@ -75,7 +75,7 @@ var app = function(deps){
   var earthAtm = deps.getEarthAtm();
   var earthLeo = deps.getEarthLeo();
   var base = deps.getBase();
-  var ship = getShip();
+	var ship = getShip();
 
   createAll();
   updateAll()
@@ -83,7 +83,7 @@ var app = function(deps){
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
 
-  loop();
+	loop();
 
   function createAll() {
     canvas.create(earth);
