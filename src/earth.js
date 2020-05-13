@@ -1,5 +1,3 @@
-document.onLoad = loadApp;
-
 function getEarth() {
   var id = 'earth';
   var state = {

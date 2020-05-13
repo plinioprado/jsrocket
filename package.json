@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-		"build": "babel src -d js",
-		"watch": "babel src -d js -w"
+    "build": "babel src -d js",
+    "watch": "babel src -d js -w"
   },
   "repository": {
     "type": "git",

@@ -1,3 +1,5 @@
+document.onLoad = loadApp;
+
 var getBase = function() {
   var id = 'base';
   var state = {
