@@ -1,4 +1,6 @@
 import getEarth from './earth';
+import renderSvg from './render-svg';
+import earth2 from './earth2';
 
 document.onLoad = loadApp;
 
@@ -23,61 +25,20 @@ var getBase = function() {
   }
 }
 
-var getEarthAtm = function() {
-  var id = 'earthAtm';
-  var state = {
-    width: 12756200 + 200000, // (m)
-    height: 12756200 + 200000, // (m)
-    position: {
-      r: 0, // distance from center (m)
-      dec: 0, // not used declination (deg)
-    },
-    style: {
-      borderRadius: '50%', // to circle
-      backgroundColor: '#ADD8E6',
-      zIndex: 2
-    }
-  }
-
-  return {
-    id,
-    state
-  }
-}
-
-var getEarthLeo = function() {
-  var id = 'earthLeo';
-  var state = {
-    width: 12756200 + 2000000, // (m)
-    height: 12756200 + 2000000, // (m)
-    position: {
-      r: 0, // distance from center (m)
-      dec: 0, // not used declination (deg)
-    },
-    style: {
-      borderRadius: '50%', // to circle
-      backgroundColor: '#303030',
-      zIndex: 1
-    }
-  }
-
-  return {
-    id,
-    state
-  }
-}
-
 var app = function(deps){
 
   var canvas = getCanvas();
   var panel = getPanel();
   var earth = getEarth();
-  var earthAtm = deps.getEarthAtm();
-  var earthLeo = deps.getEarthLeo();
   var base = deps.getBase();
 	var ship = getShip();
+	var renderSvg = deps.renderSvg()
 
-  createAll();
+	var canvasNode = document.getElementById('canvas');
+	renderSvg.create(canvasNode, deps.objs, canvas.state.zoom);
+	renderSvg.update(canvasNode, deps.objs, canvas.state.zoom);
+
+	createAll();
   updateAll()
 
   document.onclick = verifyClick;
@@ -87,16 +48,12 @@ var app = function(deps){
 
   function createAll() {
     canvas.create(earth);
-    canvas.create(earthAtm);
-    canvas.create(earthLeo);
     canvas.create(base);
     canvas.create(ship);
   }
 
   function updateAll() {
     canvas.update(earth);
-    canvas.update(earthAtm);
-    canvas.update(earthLeo);
     canvas.update(base);
     canvas.update(ship);
     panel.update();
@@ -247,7 +204,8 @@ var app = function(deps){
     var zoomMultiply = function(times) {
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
-      updateAll();
+			updateAll();
+			renderSvg.update(canvasNode, deps.objs, state.zoom)
     }
 
     var timeMultiply = function(times) {
@@ -548,8 +506,10 @@ var loadApp = (function() {
   var deps = {
     getEarth: getEarth,
     getBase: getBase,
-    getEarthAtm: getEarthAtm,
-    getEarthLeo: getEarthLeo
+		renderSvg,
+		objs: {
+			earth2
+		}
   }
 
   app(deps);
