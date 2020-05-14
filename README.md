@@ -48,6 +48,7 @@ Dev dependencies
 * webpack: bundling
 * webpack dev server: run locally
 * babel and babel loader: Transpilling
+* jest: unitesting
 
 ## License
 
