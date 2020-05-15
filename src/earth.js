@@ -57,6 +57,19 @@ var earth = {
 				format: 'rect', // for now
 				color: 'yellow'
 			}
+		},
+		{
+			id: 'moon',
+			renderType: 'svg',
+			r: 1738000, // m
+			position: {
+				r: 384000000, // distance from center (m)
+				dec: 270 // declination (deg), could be any value because r = 0
+			},
+			render: {
+				format: 'circle',
+				color: 'grey'
+			}
 		}
   ]
 }
