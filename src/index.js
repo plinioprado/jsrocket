@@ -1,41 +1,34 @@
-import getEarth from './earth';
 import renderSvg from './render-svg';
-import earth2 from './earth2';
-import getBase from './base';
+import earth from './earth';
 
 document.onLoad = loadApp;
 
 var app = function(deps){
 
+  var objs = deps.objs;
   var canvas = getCanvas();
-  var panel = getPanel();
-  var earth = getEarth();
-  var base = deps.getBase();
-	var ship = getShip();
-	var renderSvg = deps.renderSvg()
+  var ship = getShip();
+  var renderSvg = deps.renderSvg()
+  var panel = getPanel(objs.earth);
 
-	var canvasNode = document.getElementById('canvas');
-	renderSvg.create(canvasNode, deps.objs, canvas.state.zoom);
-	renderSvg.update(canvasNode, deps.objs, canvas.state.zoom);
+  var canvasNode = document.getElementById('canvas');
+  renderSvg.create(canvasNode, deps.objs);
+  renderSvg.update(canvasNode, deps.objs, canvas.state.zoom);
 
-	createAll();
+  createAll();
   updateAll()
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
 
-	loop();
+  loop();
 
   function createAll() {
-    canvas.create(earth);
-    canvas.create(base);
     canvas.create(ship);
   }
 
   function updateAll() {
-    canvas.update(earth);
-    canvas.update(base);
-    canvas.update(ship);
+    canvas.update(ship, objs.earth);
     panel.update();
   }
 
@@ -47,8 +40,8 @@ var app = function(deps){
       if (ship.state.position.burst.t < 0)  ship.state.position.burst.t = 0;
       ship.state.position.burst.t = Math.round(ship.state.position.burst.t * 10) / 10
       if (ship.state.position.burst.t === 0)  ship.state.position.burst.a = 0;
-      ship.move()
-      canvas.update(ship);
+      ship.move(objs.earth); // moves in the ship model
+      canvas.update(ship, objs.earth); // renders the moved ship
       panel.update();
 
       loop();
@@ -126,12 +119,13 @@ var app = function(deps){
       }
     }
 
-    var update = function(obj, canvasNode) {
+    var update = function(obj, earth) {
       var objNode = document.getElementById(obj.id);
-      if (!canvasNode) canvasNode = document.getElementById('canvas');
+      canvasNode = document.getElementById('canvas');
       var zoom = state.zoom;
       var pitch = obj.state.position.pitchDec;
-      var earthWidth = earth.state.width;
+      var earthWidth = earth.r * 2;
+      var earthHeight = earth.r * 2;
 
       var posPolar = {
         dec: obj.state.position.dec,
@@ -165,7 +159,7 @@ var app = function(deps){
       objNode.style.width = Math.max(objPx.width/zoom, minPx)  + 'px';
       objNode.style.height = Math.max(objPx.height/zoom,minPx) + 'px';
       objNode.style.left = canvasPx.width/2 + (objPx.x - objPx.width/2)/zoom + 'px';
-      objNode.style.top = canvasPx.height/2 + (- objPx.y + earth.state.height/2 - objPx.height/2)/zoom + 'px';
+      objNode.style.top = canvasPx.height/2 + (- objPx.y + earthHeight/2 - objPx.height/2)/zoom + 'px';
       if (pitch !== undefined) objNode.style.transform = 'rotate(' + (posPolar.dec + pitch - 90).toString() + 'deg)';
 
       if (obj.id === 'ship') {
@@ -184,8 +178,8 @@ var app = function(deps){
     var zoomMultiply = function(times) {
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
-			updateAll();
-			renderSvg.update(canvasNode, deps.objs, state.zoom)
+      updateAll();
+      renderSvg.update(canvasNode, deps.objs, state.zoom)
     }
 
     var timeMultiply = function(times) {
@@ -213,15 +207,16 @@ var app = function(deps){
     }
   }
 
-  function getPanel() {
+  function getPanel(earth) {
 
     var content = {
       alt: function() {
         var unit = 'm';
-        var alt = ship.state.position.r - earth.state.width/2;
+        var alt = ship.state.position.r - earth.r;
         if (alt > 1000) {
           alt /=  1000
           unit = 'km';
+
         }
         return Math.round(alt).toLocaleString('en-US') + unit;
       },
@@ -234,19 +229,19 @@ var app = function(deps){
       climb: function() {
         var vDec = ship.state.position.vDec + ship.state.position.dec;
         var climb = ship.state.position.vR * Math.cos(vDec * (Math.PI/180))
-        return Math.round(climb).toLocaleString('en-US') + 'km/h';
+        return Math.round(climb * 3.6).toLocaleString('en-US') + 'km/h';
       },
       vOrbit: function() {
         var vDec = ship.state.position.vDec + ship.state.position.dec;
         var v = ship.state.position.vR * Math.sin(vDec * (Math.PI/180))
-        return Math.round(v).toLocaleString('en-US') + 'km/h';
+        return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
       },
       speed: function() {
         return Math.round(ship.state.position.vR * 3.6).toLocaleString('en-US') + 'km/h';
       },
       burstA: function() {
-        var a = (ship.state.position.burst.a / earth.state.g).toFixed(0);
-        var aNext = (ship.state.position.burst.aNext / earth.state.g).toFixed(0);
+        var a = (ship.state.position.burst.a / earth.g).toFixed(0);
+        var aNext = (ship.state.position.burst.aNext / earth.g).toFixed(0);
         return a + 'g (' + aNext + 'g)';
       },
       burstT: function() {
@@ -405,20 +400,20 @@ var app = function(deps){
     }
 
     var burstNextA = function(aNext) {
-      if (aNext < 10) state.position.burst.aNext = Math.round(aNext * earth.state.g * 100)/100;
+      if (aNext < 10) state.position.burst.aNext = Math.round(aNext * 9.8 * 100)/100;
     }
 
     var burstNextT = function(tNext) {
       ship.state.position.burst.tNext = Math.max(ship.state.position.burst.tNext + tNext, 0)
     }
 
-    var move = function() {
+    var move = function(earth) {
       var aPolar = {r: state.position.burst.a, dec: normalDeg(state.position.dec + state.position.pitchDec)};
       var gPolar = {r: -getLocalG(), dec: state.position.dec};
       var vPolar = {r: state.position.vR, dec: state.position.vDec};
       var posPolar = {r: state.position.r, dec: state.position.dec};
-      if ((posPolar.r < earth.state.width/2) || (posPolar.r === earth.state.width/2 && aPolar.r <= 0)) {
-        state.position.r = earth.state.width/2;
+      if ((posPolar.r < earth.r) || (posPolar.r === earth.r && aPolar.r <= 0)) {
+        state.position.r = earth.r;
         return;
       }
 
@@ -434,7 +429,10 @@ var app = function(deps){
 
       vPolar = toPolar(vCart);
       posPolar = toPolar(posCart);
-      if (posPolar.r <= earth.state.width/2) vPolar = { r: 0, dec: 0 }
+      if (posPolar.r <= earth.r && vPolar.r > (100 / 3.6)) {
+        crash(vPolar.r);
+        return;
+      }
 
       state.position.vR = roundM(vPolar.r);
       state.position.vDec = roundM(vPolar.dec);
@@ -464,8 +462,14 @@ var app = function(deps){
       }
 
       function getLocalG() {
-        var localG = earth.state.g / (state.position.r / (earth.state.width/2)) ** 2;
+        var localG = earth.g / (state.position.r / earth.r) ** 2;
         return localG;
+      }
+
+      function crash(v) {
+        state.position.vR = 0;
+        state.position.vDec = 0;
+        alert('crashed at ' + parseInt(v * 3.6) + 'km/h. Reload.');
       }
     }
 
@@ -484,12 +488,10 @@ var app = function(deps){
 var loadApp = (function() {
 
   var deps = {
-    getEarth: getEarth,
-    getBase: getBase,
-		renderSvg: renderSvg,
-		objs: {
-			earth2: earth2
-		}
+    renderSvg: renderSvg,
+    objs: {
+      earth: earth
+    }
   }
 
   app(deps);
