@@ -1,37 +1,33 @@
 import renderSvg from './render-svg';
 import earth from './earth';
-import getBase from './base';
 
 document.onLoad = loadApp;
 
 var app = function(deps){
 
-	var objs = deps.objs;
+  var objs = deps.objs;
   var canvas = getCanvas();
-  var base = deps.getBase();
-	var ship = getShip();
-	var renderSvg = deps.renderSvg()
-	var panel = getPanel(objs.earth);
+  var ship = getShip();
+  var renderSvg = deps.renderSvg()
+  var panel = getPanel(objs.earth);
 
-	var canvasNode = document.getElementById('canvas');
-	renderSvg.create(canvasNode, deps.objs, canvas.state.zoom);
-	renderSvg.update(canvasNode, deps.objs, canvas.state.zoom);
+  var canvasNode = document.getElementById('canvas');
+  renderSvg.create(canvasNode, deps.objs);
+  renderSvg.update(canvasNode, deps.objs, canvas.state.zoom);
 
-	createAll();
+  createAll();
   updateAll()
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
 
-	loop();
+  loop();
 
   function createAll() {
-    canvas.create(base);
     canvas.create(ship);
   }
 
   function updateAll() {
-    canvas.update(base, objs.earth);
     canvas.update(ship, objs.earth);
     panel.update();
   }
@@ -128,8 +124,8 @@ var app = function(deps){
       canvasNode = document.getElementById('canvas');
       var zoom = state.zoom;
       var pitch = obj.state.position.pitchDec;
-			var earthWidth = earth.r * 2;
-			var earthHeight = earth.r * 2;
+      var earthWidth = earth.r * 2;
+      var earthHeight = earth.r * 2;
 
       var posPolar = {
         dec: obj.state.position.dec,
@@ -182,8 +178,8 @@ var app = function(deps){
     var zoomMultiply = function(times) {
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
-			updateAll();
-			renderSvg.update(canvasNode, deps.objs, state.zoom)
+      updateAll();
+      renderSvg.update(canvasNode, deps.objs, state.zoom)
     }
 
     var timeMultiply = function(times) {
@@ -220,6 +216,7 @@ var app = function(deps){
         if (alt > 1000) {
           alt /=  1000
           unit = 'km';
+
         }
         return Math.round(alt).toLocaleString('en-US') + unit;
       },
@@ -232,12 +229,12 @@ var app = function(deps){
       climb: function() {
         var vDec = ship.state.position.vDec + ship.state.position.dec;
         var climb = ship.state.position.vR * Math.cos(vDec * (Math.PI/180))
-        return Math.round(climb).toLocaleString('en-US') + 'km/h';
+        return Math.round(climb * 3.6).toLocaleString('en-US') + 'km/h';
       },
       vOrbit: function() {
         var vDec = ship.state.position.vDec + ship.state.position.dec;
         var v = ship.state.position.vR * Math.sin(vDec * (Math.PI/180))
-        return Math.round(v).toLocaleString('en-US') + 'km/h';
+        return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
       },
       speed: function() {
         return Math.round(ship.state.position.vR * 3.6).toLocaleString('en-US') + 'km/h';
@@ -336,7 +333,7 @@ var app = function(deps){
         burst: {
           a: 0,//Math.round(4 * 9.80665), //0, // current burst acceleration (m/s2)
           aNext: Math.round(4 * 9.80665), // selected acceleration for next burst (m/s2)
-					t: 4, // 0, // current burst remaining time (s)
+          t: 4, // 0, // current burst remaining time (s)
           tNext: 4 // selected time for next burst (s)
         }
       },
@@ -403,7 +400,7 @@ var app = function(deps){
     }
 
     var burstNextA = function(aNext) {
-      if (aNext < 10) state.position.burst.aNext = Math.round(aNext * 100)/100;
+      if (aNext < 10) state.position.burst.aNext = Math.round(aNext * 9.8 * 100)/100;
     }
 
     var burstNextT = function(tNext) {
@@ -432,7 +429,10 @@ var app = function(deps){
 
       vPolar = toPolar(vCart);
       posPolar = toPolar(posCart);
-      if (posPolar.r <= earth.r) vPolar = { r: 0, dec: 0 }
+      if (posPolar.r <= earth.r && vPolar.r > (100 / 3.6)) {
+        crash(vPolar.r);
+        return;
+      }
 
       state.position.vR = roundM(vPolar.r);
       state.position.vDec = roundM(vPolar.dec);
@@ -465,6 +465,12 @@ var app = function(deps){
         var localG = earth.g / (state.position.r / earth.r) ** 2;
         return localG;
       }
+
+      function crash(v) {
+        state.position.vR = 0;
+        state.position.vDec = 0;
+        alert('crashed at ' + parseInt(v * 3.6) + 'km/h. Reload.');
+      }
     }
 
     return {
@@ -482,11 +488,10 @@ var app = function(deps){
 var loadApp = (function() {
 
   var deps = {
-    getBase: getBase,
-		renderSvg: renderSvg,
-		objs: {
-			earth: earth
-		}
+    renderSvg: renderSvg,
+    objs: {
+      earth: earth
+    }
   }
 
   app(deps);
