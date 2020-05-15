@@ -3,7 +3,7 @@ let renderSvg = function() {
   let create = (canvasNode, objs, zoom) => {
     // handles static properties
 
-    let keys = Object.keys(objs);
+    let keys = Object.keys(objs); // children before to hender behind
     keys.forEach(key => {
       let obj = objs[key];
       if (obj.children) {

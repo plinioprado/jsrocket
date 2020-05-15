@@ -1,5 +1,5 @@
-var earth2 = {
-  id: 'earth2',
+var earth = {
+  id: 'earth',
   renderType: 'svg',
 	r: 6378100, // m
 	g: 9.80665, // m/s2
@@ -40,4 +40,4 @@ var earth2 = {
   ]
 }
 
-export default earth2;
+export default earth;
