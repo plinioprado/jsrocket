@@ -4,12 +4,12 @@ var earth2 = {
 	r: 6378100, // m
 	g: 9.80665, // m/s2
   position: {
-    r: 0, // r
-    dec: 0 // deg
+    r: 0, // distance from center (m)
+    dec: 0 // declination (deg), could be any value because r = 0
   },
   render: {
     format: 'circle',
-    color: 'dark-blue'
+    color: 'blue'
   },
   children: [{
     id: 'earthLeo',

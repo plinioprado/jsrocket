@@ -6,12 +6,12 @@ let renderSvg = function() {
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
-      if (obj.renderType === 'svg' && obj.id !== 'earth2') createObj(canvasNode, objs)
       if (obj.children) {
         obj.children.forEach(obj => {
           createObj(canvasNode, obj);
         })
       }
+      if (obj.renderType === 'svg') createObj(canvasNode, objs[key])
     });
   }
 
@@ -22,10 +22,10 @@ let renderSvg = function() {
     keys.forEach(key => {
       let obj = objs[key];
       let viewCenter = getViewCenter(canvasNode, obj, zoom);
-      if (obj.renderType === 'svg' && obj.id !== 'earth2') updateObj(canvasNode, objs, zoom, viewCenter)
+      if (obj.renderType === 'svg') updateObj(obj, zoom, viewCenter);
       if (obj.children) {
         obj.children.forEach(obj => {
-          updateObj(canvasNode, obj, zoom, viewCenter);
+          updateObj(obj, zoom, viewCenter);
         })
       }
     });
@@ -43,12 +43,8 @@ let renderSvg = function() {
     canvasSvgNode.appendChild(newNode);
   }
 
-  function updateObj(canvasNode, obj, zoom, viewCenter) {
-    var node;
-    let canvasSvgNode = getSvgCanvasNode(canvasNode);
-    for (let i = 0; i < canvasSvgNode.children.length; i++) {
-      if (canvasSvgNode.children[i].id === obj.id) node = canvasSvgNode.children[i];
-    }
+  function updateObj(obj, zoom, viewCenter) {
+    let node = document.getElementById(obj.id);
     node.setAttributeNS(null, 'cx', viewCenter.x);
     node.setAttributeNS(null, 'cy', viewCenter.y);
     node.setAttributeNS(null, 'r', obj.r / zoom);
