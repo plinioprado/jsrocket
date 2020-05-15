@@ -1,12 +1,11 @@
 let renderSvg = function() {
 
-  let create = (canvasNode, objs, zoom) => {
+  let create = (canvasNode, objs) => {
     // handles static properties
 
-    let keys = Object.keys(objs);
+    let keys = Object.keys(objs); // children before to hender behind
     keys.forEach(key => {
       let obj = objs[key];
-      if (obj.renderType === 'svg' && obj.id !== 'earth2') createObj(canvasNode, objs)
       if (obj.children) {
         obj.children.forEach(obj => {
           createObj(canvasNode, obj);
@@ -22,10 +21,10 @@ let renderSvg = function() {
     keys.forEach(key => {
       let obj = objs[key];
       let viewCenter = getViewCenter(canvasNode, obj, zoom);
-      if (obj.renderType === 'svg' && obj.id !== 'earth2') updateObj(canvasNode, objs, zoom, viewCenter)
+      if (obj.renderType === 'svg') updateObj(obj, zoom, viewCenter);
       if (obj.children) {
         obj.children.forEach(obj => {
-          updateObj(canvasNode, obj, zoom, viewCenter);
+          updateObj(obj, zoom, viewCenter);
         })
       }
     });
@@ -36,22 +35,35 @@ let renderSvg = function() {
     canvasNode.appendChild(canvasSvgNode);
 
     let svgns = 'http://www.w3.org/2000/svg';
-    let newNode = document.createElementNS(svgns, 'circle');
+    let newNode = document.createElementNS(svgns, obj.render.format);
     newNode.setAttributeNS(null, 'id', obj.id);
-    newNode.setAttributeNS(null, 'r', 0); // will be set in update
     newNode.setAttributeNS(null, 'fill', obj.render.color);
+
     canvasSvgNode.appendChild(newNode);
   }
 
-  function updateObj(canvasNode, obj, zoom, viewCenter) {
-    var node;
-    let canvasSvgNode = getSvgCanvasNode(canvasNode);
-    for (let i = 0; i < canvasSvgNode.children.length; i++) {
-      if (canvasSvgNode.children[i].id === obj.id) node = canvasSvgNode.children[i];
+  function updateObj(obj, zoom, viewCenter) {
+    const cart = fromPolar({
+      r: obj.position.r,
+      dec: obj.position.dec
+    });
+
+    const svgTag = obj.render.format;
+    let node = document.getElementById(obj.id);
+    node.setAttributeNS(null, 'cx', viewCenter.x - cart.x / zoom);
+    node.setAttributeNS(null, 'cy', viewCenter.y - cart.y / zoom);
+    if (svgTag === 'circle') {
+      node.setAttributeNS(null, 'cx', viewCenter.x - cart.x / zoom);
+      node.setAttributeNS(null, 'cy', viewCenter.y - cart.y / zoom);
+      node.setAttributeNS(null, 'r', obj.r / zoom);
+    } else if (svgTag === 'rect') {
+      const widthPx = Math.max(2,obj.width / zoom);
+      const heightPx = Math.max(2,obj.height / zoom);
+      node.setAttributeNS(null, 'x', viewCenter.x - cart.x/zoom - widthPx / 2);
+      node.setAttributeNS(null, 'y', viewCenter.y - cart.y / zoom);
+      node.setAttributeNS(null, 'width', widthPx);
+      node.setAttributeNS(null, 'height', heightPx);
     }
-    node.setAttributeNS(null, 'cx', viewCenter.x);
-    node.setAttributeNS(null, 'cy', viewCenter.y);
-    node.setAttributeNS(null, 'r', obj.r / zoom);
   }
 
   function getSvgCanvasNode(canvasNode) {
@@ -76,6 +88,13 @@ let renderSvg = function() {
     return {
       y: canvasNode.offsetHeight / 2 + obj.r / zoom,
       x: canvasNode.offsetWidth / 2
+    }
+  }
+
+  function fromPolar(polar) {
+    return {
+      x: polar.r * Math.sin(polar.dec * Math.PI/180),
+      y: polar.r * Math.cos(polar.dec * Math.PI/180)
     }
   }
 
