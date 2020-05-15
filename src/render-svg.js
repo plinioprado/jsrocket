@@ -46,21 +46,25 @@ let renderSvg = function() {
     const cart = fromPolar({
       r: obj.position.r,
       dec: obj.position.dec
-    });
+		});
+
+		const trim = {
+			x: 0 / zoom,
+			y: 6378100  / zoom //
+		}
 
     const svgTag = obj.render.format;
     let node = document.getElementById(obj.id);
-    node.setAttributeNS(null, 'cx', viewCenter.x - cart.x / zoom);
-    node.setAttributeNS(null, 'cy', viewCenter.y - cart.y / zoom);
     if (svgTag === 'circle') {
-      node.setAttributeNS(null, 'cx', viewCenter.x - cart.x / zoom);
-      node.setAttributeNS(null, 'cy', viewCenter.y - cart.y / zoom);
-      node.setAttributeNS(null, 'r', obj.r / zoom);
+			const rPx = Math.max(2,obj.r / zoom);
+      node.setAttributeNS(null, 'cx', viewCenter.x + trim.x - cart.x / zoom);
+      node.setAttributeNS(null, 'cy', viewCenter.y + trim.y - cart.y / zoom);
+			node.setAttributeNS(null, 'r', rPx);
     } else if (svgTag === 'rect') {
       const widthPx = Math.max(2,obj.width / zoom);
       const heightPx = Math.max(2,obj.height / zoom);
-      node.setAttributeNS(null, 'x', viewCenter.x - cart.x/zoom - widthPx / 2);
-      node.setAttributeNS(null, 'y', viewCenter.y - cart.y / zoom);
+      node.setAttributeNS(null, 'x', viewCenter.x + trim.x - cart.x/zoom - widthPx / 2);
+      node.setAttributeNS(null, 'y', viewCenter.y + trim.y - cart.y / zoom);
       node.setAttributeNS(null, 'width', widthPx);
       node.setAttributeNS(null, 'height', heightPx);
     }
@@ -86,7 +90,7 @@ let renderSvg = function() {
 
   function getViewCenter(canvasNode, obj, zoom) {
     return {
-      y: canvasNode.offsetHeight / 2 + obj.r / zoom,
+      y: canvasNode.offsetHeight / 2,
       x: canvasNode.offsetWidth / 2
     }
   }
