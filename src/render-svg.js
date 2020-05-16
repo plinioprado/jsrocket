@@ -1,32 +1,34 @@
-let renderSvg = function() {
+let renderSvg = () => {
 
-  let create = (canvasNode, objs) => {
-    // handles static properties
+  let canvasNode;
+
+  let create = (objs) => {
+    // called at init
+
+    canvasNode = document.getElementById('canvas');
 
     let keys = Object.keys(objs); // children before to hender behind
     keys.forEach(key => {
       let obj = objs[key];
-      if (obj.children) {
-        obj.children.forEach(obj => {
+      if (obj.objList) {
+        obj.objList.forEach(obj => {
           createObj(canvasNode, obj);
         })
       }
     });
   }
 
-  let update = (canvasNode, objs, zoom) => {
-    // handles dynamic properties
+  let update = (objs, zoom) => {
+    // called at init and each loop iteracion
 
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
       let viewCenter = getViewCenter(canvasNode, obj, zoom);
       if (obj.renderType === 'svg') updateObj(obj, zoom, viewCenter);
-      if (obj.children) {
-        obj.children.forEach(obj => {
-          updateObj(obj, zoom, viewCenter);
-        })
-      }
+      obj.objList.forEach(obj => {
+        updateObj(obj, zoom, viewCenter);
+      })
     });
   }
 
@@ -56,13 +58,13 @@ let renderSvg = function() {
     const svgTag = obj.render.format;
     let node = document.getElementById(obj.id);
     if (svgTag === 'circle') {
-			const rPx = Math.max(2,obj.r / zoom);
-      node.setAttributeNS(null, 'cx', viewCenter.x + trim.x - cart.x / zoom);
+			let rPx = Math.max(2, obj.r / zoom);
+      node.setAttributeNS(null, 'cx', viewCenter.x + trim.x + cart.x / zoom);
       node.setAttributeNS(null, 'cy', viewCenter.y + trim.y - cart.y / zoom);
 			node.setAttributeNS(null, 'r', rPx);
     } else if (svgTag === 'rect') {
-      const widthPx = Math.max(2,obj.width / zoom);
-      const heightPx = Math.max(2,obj.height / zoom);
+      const widthPx = Math.max(2, obj.width / zoom);
+      const heightPx = Math.max(2, obj.height / zoom);
       node.setAttributeNS(null, 'x', viewCenter.x + trim.x - cart.x/zoom - widthPx / 2);
       node.setAttributeNS(null, 'y', viewCenter.y + trim.y - cart.y / zoom);
       node.setAttributeNS(null, 'width', widthPx);

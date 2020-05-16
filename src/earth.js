@@ -1,8 +1,8 @@
 var earth = {
   id: 'earth',
-	r: 6378100, // m
-	g: 9.80665, // m/s2
-  children: [
+	r: 6378100, // for legacy move and render div (m)
+	g: 9.80665, // for legacy move and render div (m/s2)
+  objList: [
 		{
 			id: 'earthLeo',
 			renderType: 'svg',
@@ -56,19 +56,6 @@ var earth = {
 			render: {
 				format: 'rect', // for now
 				color: 'yellow'
-			}
-		},
-		{
-			id: 'moon',
-			renderType: 'svg',
-			r: 1738000, // m
-			position: {
-				r: 384000000, // distance from center (m)
-				dec: 270 // declination (deg), could be any value because r = 0
-			},
-			render: {
-				format: 'circle',
-				color: 'grey'
 			}
 		}
   ]
