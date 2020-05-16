@@ -17,6 +17,8 @@ let renderSvg = function() {
   let update = (canvasNode, objs, zoom) => {
     // handles dynamic properties
 
+    const trim = getTrim(zoom);
+
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
@@ -24,7 +26,7 @@ let renderSvg = function() {
       if (obj.renderType === 'svg') updateObj(obj, zoom, viewCenter);
       if (obj.children) {
         obj.children.forEach(obj => {
-          updateObj(obj, zoom, viewCenter);
+          updateObj(obj, zoom, viewCenter, trim);
         })
       }
     });
@@ -42,24 +44,20 @@ let renderSvg = function() {
     canvasSvgNode.appendChild(newNode);
   }
 
-  function updateObj(obj, zoom, viewCenter) {
+  function updateObj(obj, zoom, viewCenter, trim) {
+    
     const cart = fromPolar({
       r: obj.position.r,
       dec: obj.position.dec
-		});
-
-		const trim = {
-			x: 0 / zoom,
-			y: 6378100  / zoom //
-		}
+    });
 
     const svgTag = obj.render.format;
     let node = document.getElementById(obj.id);
     if (svgTag === 'circle') {
-			const rPx = Math.max(2,obj.r / zoom);
+      const rPx = Math.max(2,obj.r / zoom);
       node.setAttributeNS(null, 'cx', viewCenter.x + trim.x - cart.x / zoom);
       node.setAttributeNS(null, 'cy', viewCenter.y + trim.y - cart.y / zoom);
-			node.setAttributeNS(null, 'r', rPx);
+      node.setAttributeNS(null, 'r', rPx);
     } else if (svgTag === 'rect') {
       const widthPx = Math.max(2,obj.width / zoom);
       const heightPx = Math.max(2,obj.height / zoom);
@@ -86,6 +84,13 @@ let renderSvg = function() {
     }
 
     return canvasSvgNode;
+  }
+  
+  function getTrim(zoom) {
+    return {
+      x: 0 / zoom,
+      y: 6378100  / zoom //
+    }
   }
 
   function getViewCenter(canvasNode, obj, zoom) {
