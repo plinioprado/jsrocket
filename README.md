@@ -1,12 +1,10 @@
 # jsrocket
 
-Orbital flight simulator in javascript
+Orbital flight simulator in javascript.
 
-The goal is to evolve the features and code. But keep the application simple enough to allow playing not only with the piloting, but also with the modelling and rendering.
+The goal is to evolve the features and code. But keep the application simple enough to allow playing not only with the piloting, but also with the modelling.
 
-There is a secondary goal to explore fundamentals of javascript, that's why the no use of 3rd party packages in the code itself, and some development tools like transpiling and testing.
-
-If you touch earth descending at more than 100km/h you crash.
+There is a secondary goal to explore fundamentals of javascript, therefore the no use of 3rd party packages in the code itself, and some development tools.
 
 ## Status
 
@@ -16,7 +14,7 @@ Most of the current evolution is being made basically in the rendering and break
 
 Next features:
 
-* Control panel with better speed references and instruments display
+* Control panel with better instruments.
 * Options to move the view center.
 * 'T' activating a trail of the recent trajectory
 
