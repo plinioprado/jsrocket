@@ -1,7 +1,7 @@
 import renderSvg from './render-svg';
 import moveSvg from './move-svg';
 import earth from './earth';
-import moon from './moon';
+//import moon from './moon';
 
 document.onLoad = loadApp;
 
@@ -16,8 +16,8 @@ var app = function(deps){
 	
 	moveSvg.init(objs);
 
-  var canvasNode = document.getElementById('canvas');
-  renderSvg.create(objs);
+	renderSvg.create(objs);
+	//renderSvg.createOne(deps.moon.objList, canvas.state.zoom);
   renderSvg.update(objs, canvas.state.zoom);
 
   createAll();
@@ -141,7 +141,7 @@ var app = function(deps){
 
     var update = function(obj, earth) {
       var objNode = document.getElementById(obj.id);
-      canvasNode = document.getElementById('canvas');
+      var canvasNode = document.getElementById('canvas');
       var zoom = state.zoom;
       var pitch = obj.state.position.pitchDec;
       var earthWidth = earth.r * 2;
@@ -199,7 +199,8 @@ var app = function(deps){
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
       updateAll();
-      renderSvg.update(deps.objs, state.zoom)
+			renderSvg.update(deps.objs, state.zoom)
+			//renderSvg.updateOne(deps.moon.objList, canvas.state.zoom);
     }
 
     var timeMultiply = function(times) {
@@ -510,9 +511,9 @@ var loadApp = (function() {
   var deps = {
 		renderSvg: renderSvg,
 		moveSvg: moveSvg,
+		//moon: moon,
     objs: {
-			earth: earth,
-			moon: moon
+			earth: earth
     }
   }
 

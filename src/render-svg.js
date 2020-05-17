@@ -1,6 +1,7 @@
 let renderSvg = () => {
 
   let canvasNode;
+  let viewCenter;
 
   let create = (objs) => {
     // called at init
@@ -18,18 +19,38 @@ let renderSvg = () => {
     });
   }
 
+  let createOne = (objList, zoom) => {
+    // called at init
+
+    if (!canvasNode) canvasNode = document.getElementById('canvas');
+
+    objList.forEach(obj => {
+      createObj(canvasNode, obj);
+    })
+    updateOne(objList, zoom);
+  }
+
   let update = (objs, zoom) => {
     // called at init and each loop iteracion
-
+    if (!viewCenter) viewCenter = getViewCenter(canvasNode);
+    
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
-      let viewCenter = getViewCenter(canvasNode, obj, zoom);
       if (obj.renderType === 'svg') updateObj(obj, zoom, viewCenter);
       obj.objList.forEach(obj => {
         updateObj(obj, zoom, viewCenter);
       })
     });
+  }
+
+  let updateOne = (objList, zoom) => {
+    // called at init and loop
+
+    if (!viewCenter) viewCenter = getViewCenter(canvasNode);
+    objList.forEach(obj => {
+      updateObj(obj, zoom, viewCenter);
+    })
   }
 
   function createObj(canvasNode, obj) {
@@ -40,6 +61,8 @@ let renderSvg = () => {
     let newNode = document.createElementNS(svgns, obj.render.format);
     newNode.setAttributeNS(null, 'id', obj.id);
     newNode.setAttributeNS(null, 'fill', obj.render.color);
+    if (obj.render.stroke) newNode.setAttributeNS(null, 'stroke', obj.render.stroke);
+    if (obj.render.strokeDasharray) newNode.setAttributeNS(null, 'stroke-dasharray', obj.render.strokeDasharray);
 
     canvasSvgNode.appendChild(newNode);
   }
@@ -48,20 +71,20 @@ let renderSvg = () => {
     const cart = fromPolar({
       r: obj.position.r,
       dec: obj.position.dec
-		});
+    });
 
-		const trim = {
-			x: 0 / zoom,
-			y: 6378100  / zoom //
-		}
+    const trim = {
+      x: 0 / zoom,
+      y: 6378100  / zoom //
+    }
 
     const svgTag = obj.render.format;
     let node = document.getElementById(obj.id);
     if (svgTag === 'circle') {
-			let rPx = Math.max(2, obj.r / zoom);
+      let rPx = Math.max(2, obj.r / zoom);
       node.setAttributeNS(null, 'cx', viewCenter.x + trim.x + cart.x / zoom);
       node.setAttributeNS(null, 'cy', viewCenter.y + trim.y - cart.y / zoom);
-			node.setAttributeNS(null, 'r', rPx);
+      node.setAttributeNS(null, 'r', rPx);
     } else if (svgTag === 'rect') {
       const widthPx = Math.max(2, obj.width / zoom);
       const heightPx = Math.max(2, obj.height / zoom);
@@ -90,7 +113,7 @@ let renderSvg = () => {
     return canvasSvgNode;
   }
 
-  function getViewCenter(canvasNode, obj, zoom) {
+  function getViewCenter(canvasNode) {
     return {
       y: canvasNode.offsetHeight / 2,
       x: canvasNode.offsetWidth / 2
@@ -106,7 +129,9 @@ let renderSvg = () => {
 
   return {
     create,
-    update
+    update,
+    createOne,
+    updateOne
   }
 }
 
