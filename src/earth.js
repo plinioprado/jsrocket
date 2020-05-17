@@ -1,8 +1,8 @@
 var earth = {
   id: 'earth',
-	r: 6378100, // m
-	g: 9.80665, // m/s2
-  children: [
+	r: 6378100, // for legacy move and render div (m)
+	g: 9.80665, // for legacy move and render div (m/s2)
+  objList: [
 		{
 			id: 'earthLeo',
 			renderType: 'svg',

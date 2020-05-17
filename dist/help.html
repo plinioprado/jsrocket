@@ -16,9 +16,10 @@
 			<p>The piloting is done rotating the ship and firing jet burts from the tail under controlled accelerations and durations.</p>
 			<p>This simulator can be used with two goals:</p>
 			<ul>
-				<li>Take off, flight a few km high, make some loops and return to base not too fast</li>
+				<li>Take off, flight a few km high, make some loops and land back in the base descebding at less than 50km/h</li>
 				<li>Take off and manouver to achieve a stable circular orbit above the atmpsphere (until 100km altitude and in blue) and within the Low Earth Orbit (until 2000km altitude and in dark grey,  where most human made satelites are).</li>
 			</ul>
+			<p>If the ship touch Earth descending at more than 50km/h it crashes. After 1 year the fuel exausts.</p>
 			<h2>Ship controls</h2>
 			<ul>
 				<li>'Up arrow': increases ship pitch by 10 degrees, rotating it up</li>
@@ -39,9 +40,8 @@
 				<li>'&lt;': Time speed / 2</li>
 			</ul>
 			<h2>Orbital flying</h2>
-			<p>Orbital flight is about manouvering to the right speed around the earth at the chosen altitude (ex: ISS orbits at about 400km high at 28.000km/h).</p>
-			<p>The "Time speed" control is important (ex: each ISS complete orbit takes around 90min), but combined with the 9g thrust with unlimited fuel can easily take the ship to speeds hard to control toward outer space</p>
-			<p>The position is set in angle and distance 2D polar coordinates, representing declination (longitude) and altitude over the equator.</p>
+			<p>Orbital flight is about manouvering between circular orbits, mantaining each one requires the right orbital speed (around the earth) for the chosen altitude (ex: ISS orbits at about 400km high at 28.000km/h).</p>
+			<p>The "Time speed" can be set from up too 1000K faster then normal. Important (ex: each ISS complete orbit takes around 90min), but combined with the 9g thrust can easily take the ship to speeds hard to control toward outer space</p>
 			<p>Flying within the atmosphere is not affected by air drag and heating, for now.</p>
 		</main>
 	</body>

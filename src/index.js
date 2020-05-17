@@ -1,5 +1,7 @@
 import renderSvg from './render-svg';
+import moveSvg from './move-svg';
 import earth from './earth';
+//import moon from './moon';
 
 document.onLoad = loadApp;
 
@@ -8,12 +10,15 @@ var app = function(deps){
   var objs = deps.objs;
   var canvas = getCanvas();
   var ship = getShip();
-  var renderSvg = deps.renderSvg()
-  var panel = getPanel(objs.earth);
+	var moveSvg = deps.moveSvg(deps.objs);
+	var renderSvg = deps.renderSvg()
+	var panel = getPanel(objs.earth);
+	
+	moveSvg.init(objs);
 
-  var canvasNode = document.getElementById('canvas');
-  renderSvg.create(canvasNode, deps.objs);
-  renderSvg.update(canvasNode, deps.objs, canvas.state.zoom);
+	renderSvg.create(objs);
+	//renderSvg.createOne(deps.moon.objList, canvas.state.zoom);
+  renderSvg.update(objs, canvas.state.zoom);
 
   createAll();
   updateAll()
@@ -42,11 +47,26 @@ var app = function(deps){
       if (ship.state.position.burst.t === 0)  ship.state.position.burst.a = 0;
       ship.move(objs.earth); // moves in the ship model
       canvas.update(ship, objs.earth); // renders the moved ship
-      panel.update();
-
-      loop();
+			moveSvg.move(canvas.state.timeSpeed);
+			renderSvg.update(objs, canvas.state.zoom);
+			panel.update();
+			
+			if (!checkTimeOut()) loop();
     }, 1000 * canvas.state.secondSkip);
-  }
+	}
+	
+	function checkTimeOut() {
+		var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
+		var d = new Date(0, 0, 0, 0, 0, 0, 0);
+		d.setSeconds(canvas.state.time);
+		var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
+		
+		if (days > 365) {
+			alert('Exausted fuel after 1 year of flight. Reload game.');
+			return true;
+		}
+		return false;
+	}
 
   function verifyClick(e) {
     if(e.target.nodeName == 'A') {
@@ -121,7 +141,7 @@ var app = function(deps){
 
     var update = function(obj, earth) {
       var objNode = document.getElementById(obj.id);
-      canvasNode = document.getElementById('canvas');
+      var canvasNode = document.getElementById('canvas');
       var zoom = state.zoom;
       var pitch = obj.state.position.pitchDec;
       var earthWidth = earth.r * 2;
@@ -179,7 +199,8 @@ var app = function(deps){
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
       updateAll();
-      renderSvg.update(canvasNode, deps.objs, state.zoom)
+			renderSvg.update(deps.objs, state.zoom)
+			//renderSvg.updateOne(deps.moon.objList, canvas.state.zoom);
     }
 
     var timeMultiply = function(times) {
@@ -429,7 +450,7 @@ var app = function(deps){
 
       vPolar = toPolar(vCart);
       posPolar = toPolar(posCart);
-      if (posPolar.r <= earth.r && vPolar.r > (100 / 3.6)) {
+      if (posPolar.r <= earth.r && vPolar.r > (50 / 3.6)) {
         crash(vPolar.r);
         return;
       }
@@ -469,8 +490,8 @@ var app = function(deps){
       function crash(v) {
         state.position.vR = 0;
         state.position.vDec = 0;
-        alert('crashed at ' + parseInt(v * 3.6) + 'km/h. Reload.');
-      }
+        alert('crashed at ' + parseInt(v * 3.6) + 'km/h. Reload game.');
+			}
     }
 
     return {
@@ -488,9 +509,11 @@ var app = function(deps){
 var loadApp = (function() {
 
   var deps = {
-    renderSvg: renderSvg,
+		renderSvg: renderSvg,
+		moveSvg: moveSvg,
+		//moon: moon,
     objs: {
-      earth: earth
+			earth: earth
     }
   }
 
