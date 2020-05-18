@@ -350,7 +350,7 @@ var app = function(deps){
       height: 0, // mandatory (m)
       position: {
         r: 12756200/2, // distance (m)
-        dec: 0, // declination (deg)
+        dec: .0003, // declination (deg)
         pitchDec: 0, // attitude pitch (deg)
         vR: 0, // v speed (m/s)
         vDec: 0, // heading, or v declination (deg)
