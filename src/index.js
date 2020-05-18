@@ -2,6 +2,8 @@ import renderSvg from './render-svg';
 import moveSvg from './move-svg';
 import earth from './earth';
 import moon from './moon';
+import iss from './iss';
+import ship1 from './ship';
 
 document.onLoad = loadApp;
 
@@ -10,15 +12,15 @@ var app = function(deps){
   var objs = deps.objs;
   var canvas = getCanvas();
   var ship = getShip();
-	var moveSvg = deps.moveSvg(deps.objs);
-	var renderSvg = deps.renderSvg()
-	var panel = getPanel(objs.earth);
-	
-	moveSvg.init(objs);
+  var moveSvg = deps.moveSvg(deps.objs);
+  var renderSvg = deps.renderSvg()
+  var panel = getPanel(objs.earth);
+  var ship1 = deps.ship1;
 
-  var canvasNode = document.getElementById('canvas');
-  renderSvg.create(objs);
-  renderSvg.update(objs, canvas.state.zoom);
+  moveSvg.init(objs);
+
+  var canvasNode = document.getElementById('canvas'); // leave until ship is svg
+
 
   createAll();
   updateAll()
@@ -30,6 +32,8 @@ var app = function(deps){
 
   function createAll() {
     canvas.create(ship);
+    renderSvg.create(objs, canvas.state.zoom);
+    renderSvg.createOne(ship1, canvas.state.zoom);
   }
 
   function updateAll() {
@@ -47,26 +51,26 @@ var app = function(deps){
       if (ship.state.position.burst.t === 0)  ship.state.position.burst.a = 0;
       ship.move(objs.earth); // moves in the ship model
       canvas.update(ship, objs.earth); // renders the moved ship
-			moveSvg.move(canvas.state.timeSpeed);
-			renderSvg.update(objs, canvas.state.zoom);
-			panel.update();
-			
-			if (!checkTimeOut()) loop();
+      moveSvg.move(canvas.state.timeSpeed);
+      renderSvg.update(objs, canvas.state.zoom);
+      panel.update();
+      
+      if (!checkTimeOut()) loop();
     }, 1000 * canvas.state.secondSkip);
-	}
-	
-	function checkTimeOut() {
-		var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
-		var d = new Date(0, 0, 0, 0, 0, 0, 0);
-		d.setSeconds(canvas.state.time);
-		var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
-		
-		if (days > 365) {
-			alert('Exausted fuel after 1 year of flight. Reload game.');
-			return true;
-		}
-		return false;
-	}
+  }
+  
+  function checkTimeOut() {
+    var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
+    var d = new Date(0, 0, 0, 0, 0, 0, 0);
+    d.setSeconds(canvas.state.time);
+    var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
+    
+    if (days > 365) {
+      alert('Exausted fuel after 1 year of flight. Reload game.');
+      return true;
+    }
+    return false;
+  }
 
   function verifyClick(e) {
     if(e.target.nodeName == 'A') {
@@ -141,7 +145,7 @@ var app = function(deps){
 
     var update = function(obj, earth) {
       var objNode = document.getElementById(obj.id);
-      canvasNode = document.getElementById('canvas');
+      this.canvasNode = document.getElementById('canvas');
       var zoom = state.zoom;
       var pitch = obj.state.position.pitchDec;
       var earthWidth = earth.r * 2;
@@ -283,7 +287,7 @@ var app = function(deps){
       },
       zoom: function() {
         var zoom  = canvas.state.zoom
-        return zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k'; ///
+        return zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k';
       },
       timeSpeed: function() {
         return convKM(canvas.state.timeSpeed);
@@ -490,7 +494,7 @@ var app = function(deps){
         state.position.vR = 0;
         state.position.vDec = 0;
         alert('crashed at ' + parseInt(v * 3.6) + 'km/h. Reload game.');
-			}
+      }
     }
 
     return {
@@ -508,11 +512,13 @@ var app = function(deps){
 var loadApp = (function() {
 
   var deps = {
-		renderSvg: renderSvg,
-		moveSvg: moveSvg,
+    renderSvg: renderSvg,
+    moveSvg: moveSvg,
+    ship1: ship1,
     objs: {
-			earth: earth,
-			moon: moon
+      earth: earth,
+      moon: moon,
+      iss: iss,
     }
   }
 

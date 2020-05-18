@@ -1,28 +1,30 @@
-var moon = {
-	id: 'moon',
+var iss = {
+	id: 'iss',
 	objList: [
 		{
-			id: 'moon',
+			id: 'iss',
 			renderType: 'svg',
-			r: 1738000, // m
+			r: 100, // m
 			position: {
-				r: 384000000, // distance from center (m)
-				dec: 90, // declination (deg), could be any value because r = 0
+				r: 6378100 + 309000, // distance from center (m)
+				dec: 0, // declination (deg), could be any value because r = 0
 				vR: 0,
-				vDec: 360 / (27.322 * 24 * 60 * 600)
+				vDec: 360 / (92.68 * 600)
 			},
 			render: {
 				format: 'circle',
-				color: '#F5F3CE'
+				color: '#d9d9d9'
 			}
 		},
 		// {
-		// 	id: 'moonOrbit',
+		// 	id: 'issOrbit',
 		// 	renderType: 'svg',
-		// 	r: 384000000, // m
+		// 	r: 6378100 + 309000, // m
 		// 	position: {
 		// 		r: 0, // distance from center (m)
 		// 		dec: 0, // declination (deg), could be any value because r = 0
+		// 		vR: 0, // distance from earth center (m)
+		// 		vDec: 0 // orbital speed (dec/s)
 		// 	},
 		// 	render: {
 		// 		format: 'circle',
@@ -34,4 +36,4 @@ var moon = {
 	]
 }
 
-export default moon;
+export default iss;
