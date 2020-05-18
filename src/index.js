@@ -4,6 +4,8 @@ import earth from './earth';
 import moon from './moon';
 import iss from './iss';
 import ship1 from './ship';
+import helpCalc from './helpCalc';
+
 
 document.onLoad = loadApp;
 
@@ -13,9 +15,9 @@ var app = function(deps){
   var canvas = getCanvas();
   var ship = getShip();
   var moveSvg = deps.moveSvg(deps.objs);
-  var renderSvg = deps.renderSvg()
+  var renderSvg = deps.renderSvg(deps.helpCalc)
   var panel = getPanel(objs.earth);
-  var ship1 = deps.ship1;
+  var ship1 = deps.ship1();
 
   moveSvg.init(objs);
 
@@ -53,6 +55,7 @@ var app = function(deps){
       canvas.update(ship, objs.earth); // renders the moved ship
       moveSvg.move(canvas.state.timeSpeed);
       renderSvg.update(objs, canvas.state.zoom);
+      renderSvg.updateOne(ship1, canvas.state.zoom);
       panel.update();
       
       if (!checkTimeOut()) loop();
@@ -94,8 +97,14 @@ var app = function(deps){
   function verifyKey(e) {
     var keyCode = e.code;
     if (keyCode === 'KeyP') canvas.playStop();
-    else if (keyCode === 'ArrowUp') ship.addPitch(10);
-    else if (keyCode === 'ArrowDown') ship.addPitch(-10);
+    else if (keyCode === 'ArrowUp') {
+      ship.addPitch(10);
+      ship1.addPitch(10);
+    }
+    else if (keyCode === 'ArrowDown') {
+      ship.addPitch(-10);
+      ship1.addPitch(-10);
+    }
     else if (keyCode === 'KeyA') ship.burstNextT(1);
     else if (keyCode === 'KeyZ') ship.burstNextT(-1);
     else if (keyCode === 'Minus') canvas.zoomMultiply(2);
@@ -519,7 +528,8 @@ var loadApp = (function() {
       earth: earth,
       moon: moon,
       iss: iss,
-    }
+    },
+    helpCalc: helpCalc
   }
 
   app(deps);

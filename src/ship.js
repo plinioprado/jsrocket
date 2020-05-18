@@ -1,6 +1,6 @@
-let ship1 = {
-	id: 'ship1',
-	objList: [
+let ship1 = () => {
+
+	const objList = [
 		{
 			id: 'ship1',
 			position: {
@@ -65,7 +65,16 @@ let ship1 = {
 				color: 'white'
 			}
 		}
-	]
+  ]
+
+  const addPitch = (add) => {
+    objList[0].position.pitchDec = (objList[0].position.pitchDec += add) % 360;
+  }
+  
+  return {
+    objList,
+    addPitch
+  }
 }
 
 export default ship1;
