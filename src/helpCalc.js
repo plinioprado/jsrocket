@@ -14,6 +14,10 @@ var helpCalc = {
     }
   },
 
+  roundM: (val) => {
+    return Math.round(val * 1000000000) / 1000000000;
+  },
+
   toDeg360: (deg) => {
     return deg % 360;
   }

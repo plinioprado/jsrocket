@@ -6,7 +6,16 @@ let ship1 = () => {
       position: {
         r: 6378100, // distance (m)
         dec: 0, // declination (deg)
+        vR: 0, // v speed (m/s)
+        vDec: 0, // heading, or v declination (deg)
         pitchDec: 0, // attitude pitch (deg)
+        burst: {
+          a: 0,// current burst acceleration (m/s2)
+          aNext: Math.round(4 * 9.80665), // selected acceleration for next burst (m/s2)
+          t: 0, // current burst remaining time (s)
+          tNext: 4 // selected time for next burst (s)
+        },
+        crashed: false
       },
       render: {
         format: 'g',
@@ -45,6 +54,7 @@ let ship1 = () => {
       }
     },
     {
+      id: 'shipBurst',
       render: {
         parentId: 'ship1',
         format: 'ellipse',
@@ -54,7 +64,8 @@ let ship1 = () => {
         ry: '12',
         color: 'red',
         clipPath: 'url(#shipcrop)',
-        filter: 'url(#shipblur)'
+        filter: 'url(#shipblur)',
+        visibility: 'hidden' // or 'visible'
       }
     },
     {
@@ -67,13 +78,38 @@ let ship1 = () => {
     }
   ]
 
+  const burstUpdate = (secondSkip, timeSpeed) => {
+    objList[0].position.burst.t -= secondSkip * timeSpeed;
+    if (objList[0].position.burst.t <= 0 ) {
+      objList[0].position.burst.t = 0;
+      objList[0].position.burst.a = 0;
+    }
+  }
+
   const addPitch = (add) => {
     objList[0].position.pitchDec = (objList[0].position.pitchDec += add) % 360;
   }
-  
+
+  const addBurstTNext = (add) => {
+    objList[0].position.burst.tNext = Math.max(objList[0].position.burst.tNext + add, 0);
+  }
+
+  const setBurstANext = (gNext) => {
+    if (gNext <= 9) objList[0].position.burst.aNext = Math.round(gNext * 9.8 * 100)/100;
+  }
+
+  var burstStart = function() {
+    objList[0].position.burst.a = objList[0].position.burst.aNext;
+    objList[0].position.burst.t = objList[0].position.burst.tNext;
+  }
+
   return {
+    addBurstTNext,
+    addPitch,
+    burstStart,
+    burstUpdate,
     objList,
-    addPitch
+    setBurstANext
   }
 }
 

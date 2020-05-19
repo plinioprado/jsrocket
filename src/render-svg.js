@@ -3,6 +3,7 @@ let renderSvg = (helpCalc) => {
 
   let canvasNode;
   let viewCenter;
+  let burstNode;
   const fromPolar = helpCalc.fromPolar;
 
   init()
@@ -58,15 +59,13 @@ let renderSvg = (helpCalc) => {
   function createObj(canvasNode, obj) {
 
     let parentNode;
-
     let svgns = 'http://www.w3.org/2000/svg';
     let newNode = document.createElementNS(svgns, obj.render.format);
     if (obj.id) newNode.setAttributeNS(null, 'id', obj.id);
 
-    // let keys = Object.keys(obj.render); // todo
+    // let keys = Object.keys(obj.render); // option to below
     // for (let i = 0; i < keys.length; i++) {
     // 	if (keys[i] !== 'format' && keys[i] !== 'parentId') {
-    // 		console.log(keys[i], obj.render[keys[i]])
     // 		//newNode.setAttributeNS(null, keys[i], obj.render[keys[i]]);
     // 	}
     // }
@@ -97,6 +96,7 @@ let renderSvg = (helpCalc) => {
     }
 
     parentNode.appendChild(newNode);
+    if (obj.id === 'shipBurst') burstNode = newNode;
   }
 
   function updateObj(obj, zoom) {
@@ -127,11 +127,13 @@ let renderSvg = (helpCalc) => {
       node.setAttributeNS(null, 'width', widthPx);
       node.setAttributeNS(null, 'height', heightPx);
     } else if (obj.id === 'ship1') {
-      const x = (viewCenter.x + trim.x - cart.x/zoom - 10);
+      const x = (viewCenter.x + trim.x + cart.x/zoom - 10);
       const y = (viewCenter.y + trim.y - cart.y / zoom - 10);
       const pitch = obj.position.pitchDec;
-      const transform = `translate(${x},${y}) rotate(${pitch})`
+      const transform = `translate(${x},${y}) rotate(${pitch})`;
+      const visibility = obj.position.burst.a > 0 ?  'visible' : 'hidden';
       node.setAttributeNS(null, 'transform', transform);
+      burstNode.setAttributeNS(null, 'visibility', visibility);
     }
   }
 
