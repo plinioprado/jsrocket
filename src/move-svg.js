@@ -64,14 +64,12 @@ let moveSvg = (helpCalc) => {
     obj.position.dec = helpCalc.roundM(posPolar.dec);
 
     function getLocalG(obj, gObjs) {
-      return gObjs[0].g / (obj.position.r / gObjs[0].r) ** 2;
-    }
-
-    function crash(vPolar, posPolar, r) {
-      alert('ship crashed at' + parseInt(vPolar.r) + 'km/h');
-      vPolar.r = 0;
-      vPolar.dec = 0;
-      posPolar.r = r;
+      console.log(gObjs[0].mass)
+      const localG = (6.67 * Math.pow(10, -11)) * gObjs[0].mass / (obj.position.r ** 2)  
+      //const localG2 = (6.67 * Math.pow(10, -11)) * gObjs[1].mass / (obj.position.r ** 2)  
+      //todo: replace obj.position.r by distance ship/mon
+      //console.log('localG2=', localG2)
+      return localG;
     }
 
   }

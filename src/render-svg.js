@@ -4,7 +4,6 @@ let renderSvg = (helpCalc) => {
   let canvasNode;
   let viewCenter;
   let burstNode;
-  const fromPolar = helpCalc.fromPolar;
 
   init()
 
@@ -100,15 +99,12 @@ let renderSvg = (helpCalc) => {
   }
 
   function updateObj(obj, zoom) {
-    const cart = fromPolar({
+    const cart = helpCalc.fromPolar({
       r: obj.position.r,
       dec: obj.position.dec
     });
 
-    const trim = {
-      x: 0 / zoom,
-      y: 6378100  / zoom //
-    }
+    const trim = getTrim(zoom);
 
     const svgTag = obj.render.format;
     let node = document.getElementById(obj.id);
@@ -160,6 +156,20 @@ let renderSvg = (helpCalc) => {
       y: canvasNode.offsetHeight / 2,
       x: canvasNode.offsetWidth / 2
     }
+  }
+
+  function getTrim(zoom) {
+
+    var trimY = 6378100;
+    if (zoom <10000 ) trimY = 6378100 + 200 * zoom ;
+    if (zoom > 100000 / 2 ) trimY = 6378100 / 2;
+    if (zoom > 100000 ) trimY = 0;
+
+    let trim = {
+      x: 0 / zoom,
+      y: trimY  / zoom
+    }
+    return trim;
   }
 
   return {

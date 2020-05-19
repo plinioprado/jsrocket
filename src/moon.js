@@ -4,7 +4,8 @@ var moon = {
 		{
 			id: 'moon',
 			renderType: 'svg',
-			r: 1738000, // m
+      r: 1738000, // m
+      mass: 7.34767 * Math.pow(10, 22), // kg
 			position: {
 				r: 384000000, // distance from center (m)
 				dec: 90, // declination (deg), could be any value because r = 0

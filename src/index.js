@@ -39,7 +39,7 @@ var app = function(deps){
       renderSvg.update(objs, canvas.state.zoom);
 
       ship1.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
-      moveSvg.moveOne(ship1.objList[0], canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2]]);
+      moveSvg.moveOne(ship1.objList[0], canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
       renderSvg.updateOne(ship1, canvas.state.zoom);
       panel.update();
 
@@ -121,7 +121,6 @@ var app = function(deps){
     var zoomMultiply = function(times) {
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
-      updateAll();
       renderSvg.update(deps.objs, state.zoom)
     }
 
