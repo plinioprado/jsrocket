@@ -13,8 +13,7 @@ var app = function(deps){
 
   var objs = deps.objs;
   var canvas = getCanvas();
-  var ship = getShip();
-  var moveSvg = deps.moveSvg(deps.objs);
+  var moveSvg = deps.moveSvg(helpCalc);
   var renderSvg = deps.renderSvg(deps.helpCalc)
   var panel = getPanel(objs.earth);
   var ship1 = deps.ship1();
@@ -23,40 +22,31 @@ var app = function(deps){
 
   var canvasNode = document.getElementById('canvas'); // leave until ship is svg
 
-
-  createAll();
-  updateAll()
+  renderSvg.create(objs, canvas.state.zoom);
+  renderSvg.createOne(ship1, canvas.state.zoom);
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
 
   loop();
 
-  function createAll() {
-    canvas.create(ship);
-    renderSvg.create(objs, canvas.state.zoom);
-    renderSvg.createOne(ship1, canvas.state.zoom);
-  }
-
-  function updateAll() {
-    canvas.update(ship, objs.earth);
-    panel.update();
-  }
-
   function loop() {
     setTimeout(function() {
       if (!canvas.state.play) return;
       canvas.state.time += (canvas.state.secondSkip * canvas.state.timeSpeed);
-      if (ship.state.position.burst.t > 0) ship.state.position.burst.t -= canvas.state.secondSkip;
-      if (ship.state.position.burst.t < 0)  ship.state.position.burst.t = 0;
-      ship.state.position.burst.t = Math.round(ship.state.position.burst.t * 10) / 10
-      if (ship.state.position.burst.t === 0)  ship.state.position.burst.a = 0;
-      ship.move(objs.earth); // moves in the ship model
-      canvas.update(ship, objs.earth); // renders the moved ship
-      moveSvg.move(canvas.state.timeSpeed);
+
+      moveSvg.move(canvas.state.secondSkip, canvas.state.timeSpeed);
       renderSvg.update(objs, canvas.state.zoom);
+
+      ship1.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
+      moveSvg.moveOne(ship1.objList[0], canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2]]);
       renderSvg.updateOne(ship1, canvas.state.zoom);
       panel.update();
+
+      if (ship1.objList[0].position.crash) {
+        alert('ship crashed');
+        return;
+      }
       
       if (!checkTimeOut()) loop();
     }, 1000 * canvas.state.secondSkip);
@@ -97,24 +87,22 @@ var app = function(deps){
   function verifyKey(e) {
     var keyCode = e.code;
     if (keyCode === 'KeyP') canvas.playStop();
-    else if (keyCode === 'ArrowUp') {
-      ship.addPitch(10);
-      ship1.addPitch(10);
-    }
-    else if (keyCode === 'ArrowDown') {
-      ship.addPitch(-10);
-      ship1.addPitch(-10);
-    }
-    else if (keyCode === 'KeyA') ship.burstNextT(1);
-    else if (keyCode === 'KeyZ') ship.burstNextT(-1);
+    else if (keyCode === 'ArrowUp') ship1.addPitch(10);
+    else if (keyCode === 'ArrowDown') ship1.addPitch(-10);
+    else if (keyCode === 'KeyA') ship1.addBurstTNext(1);
+    else if (keyCode === 'KeyZ') ship1.addBurstTNext(-1);
     else if (keyCode === 'Minus') canvas.zoomMultiply(2);
     else if (keyCode === 'Equal') canvas.zoomMultiply(.5);
     else if (keyCode === 'Period') canvas.timeMultiply(2);
     else if (keyCode === 'Comma') canvas.timeMultiply(.5);
-    else if (keyCode.substring(0,5) === 'Digit') ship.burstNextA(keyCode.replace('Digit', ''));
+    else if (keyCode.substring(0,5) === 'Digit') {
+      ship1.setBurstANext(keyCode.replace('Digit', ''))
+    }
     if (!canvas.state.play) return;
 
-    if (keyCode === 'Space') ship.burstStart();
+    if (keyCode === 'Space') {
+      ship1.burstStart();
+    }
   }
 
   function getCanvas() {
@@ -128,84 +116,6 @@ var app = function(deps){
       time: 0, // time passed (s)
       timeSpeed: 1,
       secondSkip: 0.1, // each time loop timming (s)
-    }
-
-    var create = function(obj) {
-      var parentNodeId = obj.state.parentNodeId || 'canvas';
-      var parentNode = document.getElementById(parentNodeId);
-      var newNode = document.createElement('div');
-      
-      newNode.id = obj.id;
-      if (!obj.state.style.position) newNode.style.position = 'absolute';
-      
-      var keys = Object.keys(obj.state.style);
-      keys.forEach(element => {
-        newNode.style[element] = obj.state.style[element];
-      });
-
-      parentNode.appendChild(newNode);
-
-      if (obj.state.children) {
-        obj.state.children.forEach(element => {
-          create({state: element, id: element.id})
-        });
-      }
-    }
-
-    var update = function(obj, earth) {
-      var objNode = document.getElementById(obj.id);
-      this.canvasNode = document.getElementById('canvas');
-      var zoom = state.zoom;
-      var pitch = obj.state.position.pitchDec;
-      var earthWidth = earth.r * 2;
-      var earthHeight = earth.r * 2;
-
-      var posPolar = {
-        dec: obj.state.position.dec,
-        r: obj.state.position.r
-      }
-      // ajust for ship borders
-      if (obj.id === 'ship' && (posPolar.r < (earthWidth/2 + 10))) {
-        posPolar.r = earthWidth/2 + 10 * zoom;
-      }
-      var cart = fromPolar(posPolar);
-      if (obj.id === 'ship') cart.x -= 5 * zoom // adjust ship borders
-      var objM = {
-        x: cart.x,
-        y: cart.y,
-        height: obj.state.height,
-        width: obj.state.width
-      }
-
-      var objPx = {}
-      objPx.x = objM.x;
-      objPx.y = objM.y;
-      objPx.height = objM.height;
-      objPx.width = objM.width;
-
-      var canvasPx = {};
-      canvasPx.width = canvasNode.offsetWidth;
-      canvasPx.height = canvasNode.offsetHeight;
-      canvasPx.min = canvasNode.offsetHeight;
-      var minPx = obj.id === 'ship' ? 0 : Math.round(canvasPx.width/200);
-
-      objNode.style.width = Math.max(objPx.width/zoom, minPx)  + 'px';
-      objNode.style.height = Math.max(objPx.height/zoom,minPx) + 'px';
-      objNode.style.left = canvasPx.width/2 + (objPx.x - objPx.width/2)/zoom + 'px';
-      objNode.style.top = canvasPx.height/2 + (- objPx.y + earthHeight/2 - objPx.height/2)/zoom + 'px';
-      if (pitch !== undefined) objNode.style.transform = 'rotate(' + (posPolar.dec + pitch - 90).toString() + 'deg)';
-
-      if (obj.id === 'ship') {
-        var shipBurstNode = document.getElementById('shipBurst')
-        if (shipBurstNode) shipBurstNode.style.display = ship.state.position.burst.a ? 'block' : 'none';	
-      }
-
-      function fromPolar(polar) {
-        return {
-          x: polar.r * Math.sin(polar.dec * Math.PI/180),
-          y: polar.r * Math.cos(polar.dec * Math.PI/180)
-        }
-      }
     }
 
     var zoomMultiply = function(times) {
@@ -231,9 +141,7 @@ var app = function(deps){
     }
 
     return {
-      create,
       playStop,
-      update,
       state,
       timeMultiply,
       zoomMultiply
@@ -242,10 +150,12 @@ var app = function(deps){
 
   function getPanel(earth) {
 
-    var content = {
+    var position = {};
+
+    var content = { // xxx
       alt: function() {
         var unit = 'm';
-        var alt = ship.state.position.r - earth.r;
+        var alt = position.r - earth.r;
         if (alt > 1000) {
           alt /=  1000
           unit = 'km';
@@ -254,31 +164,31 @@ var app = function(deps){
         return Math.round(alt).toLocaleString('en-US') + unit;
       },
       long: function() {
-        return convLong(ship.state.position.dec);
+        return convLong(position.dec);
       },
       pitch: function() {
-        return convDeg(toDeg180(90 - ship.state.position.pitchDec));
+        return convDeg(toDeg180(90 - position.pitchDec));
       },
       climb: function() {
-        var vDec = ship.state.position.vDec + ship.state.position.dec;
-        var climb = ship.state.position.vR * Math.cos(vDec * (Math.PI/180))
+        var vDec = position.vDec + position.dec;
+        var climb = position.vR * Math.cos(vDec * (Math.PI/180))
         return Math.round(climb * 3.6).toLocaleString('en-US') + 'km/h';
       },
       vOrbit: function() {
-        var vDec = ship.state.position.vDec + ship.state.position.dec;
-        var v = ship.state.position.vR * Math.sin(vDec * (Math.PI/180))
+        var vDec = position.vDec + position.dec;
+        var v = position.vR * Math.sin(vDec * (Math.PI/180))
         return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
       },
       speed: function() {
-        return Math.round(ship.state.position.vR * 3.6).toLocaleString('en-US') + 'km/h';
+        return Math.round(position.vR * 3.6).toLocaleString('en-US') + 'km/h';
       },
       burstA: function() {
-        var a = (ship.state.position.burst.a / earth.g).toFixed(0);
-        var aNext = (ship.state.position.burst.aNext / earth.g).toFixed(0);
+        var a = (position.burst.a / earth.g).toFixed(0);
+        var aNext = (position.burst.aNext / earth.g).toFixed(0);
         return a + 'g (' + aNext + 'g)';
       },
       burstT: function() {
-        return Math.round(ship.state.position.burst.t) + 's (' + ship.state.position.burst.tNext.toFixed(0) + 's)';
+        return Math.round(position.burst.t) + 's (' + position.burst.tNext.toFixed(0) + 's)';
       },
       scale: function() {
         var scale = canvas.state.width / 10  * canvas.state.zoom;
@@ -292,7 +202,7 @@ var app = function(deps){
         return days + 'd ' + d.toLocaleTimeString('en-US', { hour12: false });
       },
       head: function() {
-        return convDeg(ship.state.position.vDec);
+        return convDeg(position.vDec);
       },
       zoom: function() {
         var zoom  = canvas.state.zoom
@@ -310,6 +220,7 @@ var app = function(deps){
       if (key) {
         document.getElementById(key).innerText = content[key]();
       } else {
+        position = ship1.objList[0].position;
         var keys = Object.keys(content);
         keys.forEach(element => {
           document.getElementById(element).innerText = content[element]();
@@ -352,170 +263,6 @@ var app = function(deps){
     }
   }
 
-  function getShip() {
-    var id = 'ship';
-    var state = {
-      width: 0, // mandatory (m)
-      height: 0, // mandatory (m)
-      position: {
-        r: 12756200/2, // distance (m)
-        dec: .0003, // declination (deg)
-        pitchDec: 0, // attitude pitch (deg)
-        vR: 0, // v speed (m/s)
-        vDec: 0, // heading, or v declination (deg)
-        burst: {
-          a: 0,//Math.round(4 * 9.80665), //0, // current burst acceleration (m/s2)
-          aNext: Math.round(4 * 9.80665), // selected acceleration for next burst (m/s2)
-          t: 4, // 0, // current burst remaining time (s)
-          tNext: 4 // selected time for next burst (s)
-        }
-      },
-      style: {
-        width: 0,
-        height: 0,
-        borderTop: '5px solid transparent',
-        borderBottom: '5px solid transparent',
-        borderLeft: '10px solid white',
-        zIndex: 2,
-        transform: 'rotate(-90deg)', // will recalc
-      },
-      children: [{
-        id: 'shipEnd',
-        parentNodeId: 'ship',
-        style: {
-          position: 'relative',
-          width: 10,
-          height: 10,
-          borderTop: '5px solid transparent',
-          borderBottom: '5px solid transparent',
-          borderLeft: '4px solid black',
-          marginTop: '-5px',
-          marginLeft: '-10px',
-          }
-        },
-        {
-          id: 'shipBurst',
-          parentNodeId: 'ship',
-          style: {
-            position: 'relative',
-            marginTop: '-15px',
-            marginLeft: '-27px',
-            width: '10px',
-            height: '20px',
-            backgroundColor: 'red',
-            transform: 'rotate(-90deg)',
-            borderRadius: '50%',
-            boxShadow: '0px 2px 2px 1px rgba(249, 129, 2, 0.7)',
-            zIndex: 1
-          }
-        },
-        {
-          id: 'shipBurstEnd',
-          parentNodeId: 'shipBurst',
-          style: {
-            width: '10px',
-            height: '10px',
-            backgroundColor: 'black',
-            zIndex: 1
-          }
-        }
-      ]
-    }
-
-    var addPitch = function(add) {
-      var pitch = (state.position.pitchDec += add) % 360;
-      state.position.pitchDec = pitch;
-    }
-
-    var burstStart = function() {
-      state.position.burst.a = state.position.burst.aNext;
-      state.position.burst.t = state.position.burst.tNext;
-    }
-
-    var burstNextA = function(aNext) {
-      if (aNext < 10) state.position.burst.aNext = Math.round(aNext * 9.8 * 100)/100;
-    }
-
-    var burstNextT = function(tNext) {
-      ship.state.position.burst.tNext = Math.max(ship.state.position.burst.tNext + tNext, 0)
-    }
-
-    var move = function(earth) {
-      var aPolar = {r: state.position.burst.a, dec: normalDeg(state.position.dec + state.position.pitchDec)};
-      var gPolar = {r: -getLocalG(), dec: state.position.dec};
-      var vPolar = {r: state.position.vR, dec: state.position.vDec};
-      var posPolar = {r: state.position.r, dec: state.position.dec};
-      if ((posPolar.r < earth.r) || (posPolar.r === earth.r && aPolar.r <= 0)) {
-        state.position.r = earth.r;
-        return;
-      }
-
-      var aCart = fromPolar(aPolar);
-      var gCart = fromPolar(gPolar);
-      var vCart = fromPolar(vPolar);
-      var posCart = fromPolar(posPolar);
-
-      vCart.x += (aCart.x + gCart.x) * canvas.state.secondSkip * canvas.state.timeSpeed;
-      vCart.y += (aCart.y + gCart.y) * canvas.state.secondSkip * canvas.state.timeSpeed;
-      posCart.x += vCart.x * canvas.state.secondSkip * canvas.state.timeSpeed;
-      posCart.y += vCart.y * canvas.state.secondSkip * canvas.state.timeSpeed;
-
-      vPolar = toPolar(vCart);
-      posPolar = toPolar(posCart);
-      if (posPolar.r <= earth.r && vPolar.r > (50 / 3.6)) {
-        crash(vPolar.r);
-        return;
-      }
-
-      state.position.vR = roundM(vPolar.r);
-      state.position.vDec = roundM(vPolar.dec);
-      state.position.r = roundM(posPolar.r);
-      state.position.dec = roundM(posPolar.dec);
-
-      function fromPolar(polar) {
-        return {
-          x: polar.r * Math.sin(polar.dec * (Math.PI/180)),
-          y: polar.r * Math.cos(polar.dec * (Math.PI/180))
-        }
-      }
-      function toPolar(cart) {
-        return {
-          r: ((cart.x ** 2 + cart.y ** 2) ** .5),
-          dec: (Math.atan2(cart.x, cart.y) / (Math.PI/180))
-        }
-      }
-
-      function normalDeg(deg) {
-        var ret = deg % 360;
-        return ret;
-      }
-
-      function roundM(val) {
-        return Math.round(val * 1000000000) / 1000000000;
-      }
-
-      function getLocalG() {
-        var localG = earth.g / (state.position.r / earth.r) ** 2;
-        return localG;
-      }
-
-      function crash(v) {
-        state.position.vR = 0;
-        state.position.vDec = 0;
-        alert('crashed at ' + parseInt(v * 3.6) + 'km/h. Reload game.');
-      }
-    }
-
-    return {
-      id,
-      addPitch,
-      burstNextA,
-      burstNextT,
-      burstStart,
-      move,
-      state
-    }
-  }
 }
 
 var loadApp = (function() {
