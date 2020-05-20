@@ -118,7 +118,7 @@ let renderSvg = (helpCalc) => {
       const widthPx = Math.max(2, obj.width / zoom);
       const heightPx = Math.max(2, obj.height / zoom);
 
-      node.setAttributeNS(null, 'x', (viewCenter.x + trim.x - cart.x/zoom - widthPx / 2));
+      node.setAttributeNS(null, 'x', (viewCenter.x + trim.x - cart.x/zoom - (widthPx / 2)));
       node.setAttributeNS(null, 'y', (viewCenter.y + trim.y - cart.y / zoom));
       node.setAttributeNS(null, 'width', widthPx);
       node.setAttributeNS(null, 'height', heightPx);
