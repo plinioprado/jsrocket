@@ -43,16 +43,26 @@ let renderSvg = (helpCalc) => {
 
   const update = (objs, zoom) => {
     // called at init and each loop iteracion
-
+    if (!viewCenter) viewCenter = getViewCenter(canvasNode);
+    
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
-
       if (obj.renderType === 'svg') updateObj(obj, zoom);
+
       obj.objList.forEach(obj => {
         updateObj(obj, zoom);
       })
     });
+  }
+
+  let updateOne = (objList, zoom) => {
+    // called at init and loop
+
+    if (!viewCenter) viewCenter = getViewCenter(canvasNode);
+    objList.forEach(obj => {
+      updateObj(obj, zoom, viewCenter);
+    })
   }
 
   function createObj(canvasNode, obj) {
