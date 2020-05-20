@@ -10,7 +10,9 @@ There is a secondary goal to explore fundamentals of javascript, therefore the n
 
 The current version is a working protype. Just read the Help instructions.
 
-Most of the current evolution is being made basically in the rendering and breaking down the code in components.
+Most of the current evolution is being made in better view centers and instruents.
+
+ISS space station and moon are orbiting Earth. But only as references, docking or landing outside the base will require the moving view centers.
 
 Next features:
 
@@ -41,11 +43,11 @@ Source maps available on Chrome Sources in webpack/./src
 
 The data is stored in objects injected as dependencies into the app. As is the svg render and probably later other functionalities.
 
-There are 2 modules for rendering: styled div (ship) and svg (other objects). Over time the ship will migrate to svg.
+Rndering is based in svg. With certains point of views according to the zoom.
 
-The rendered objects are created when the app is initiated and updated on certain events (like zoom change) or each loop cycle of 0.1s.
+The rendered objectes are created when the app is initiated and updated on zoom change or each loop cycle of 0.1s.
 
-The position, speed and acceleration are handled in polar coordinates r (ray in m) and dec (declinaton in degrees).
+The position, speed and acceleration are handled in polar coordinates r (ray in m) and dec (declinaton, or dec, in degrees).
 
 Units are expressed in SI (International System of Units).
 

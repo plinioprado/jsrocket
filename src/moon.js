@@ -4,7 +4,8 @@ var moon = {
 		{
 			id: 'moon',
 			renderType: 'svg',
-			r: 1738000, // m
+      r: 1738000, // m
+      mass: 7.34767 * Math.pow(10, 22), // kg
 			position: {
 				r: 384000000, // distance from center (m)
 				dec: 90, // declination (deg), could be any value because r = 0
@@ -16,23 +17,21 @@ var moon = {
 				color: '#F5F3CE'
 			}
 		},
-		{
-			id: 'moonOrbit',
-			renderType: 'svg',
-			r: 384000000, // m
-			position: {
-				r: 0, // distance from center (m)
-				dec: 0, // declination (deg), could be any value because r = 0
-				vR: 0, // distance from earth center (m)
-				vDec: 0 // orbital speed (dec/s)
-			},
-			render: {
-				format: 'circle',
-				color: 'transparent',
-				stroke: 'white',
-				strokeDasharray: '1,4'
-			}
-		}
+		// {
+		// 	id: 'moonOrbit',
+		// 	renderType: 'svg',
+		// 	r: 384000000, // m
+		// 	position: {
+		// 		r: 0, // distance from center (m)
+		// 		dec: 0, // declination (deg), could be any value because r = 0
+		// 	},
+		// 	render: {
+		// 		format: 'circle',
+		// 		color: 'transparent',
+		// 		stroke: 'white',
+		// 		strokeDasharray: '1,4'
+		// 	}
+		// }
 	]
 }
 

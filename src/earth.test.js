@@ -1,9 +1,9 @@
-const earth = require('./earth');
+const objs = require('./earth');
 
 test('is an object', () => {
 	expect(objs).toMatchObject(expect.anything())
 });
 
-test('id is "earth"', () => {
-  expect(earth.default.id).toBe('earth');
+test('has an id "earth"', () => {
+  expect(objs.default.id).toBe('earth');
 });
