@@ -31,7 +31,7 @@ let moveSvg = (helpCalc) => {
 
   const moveOne = (obj, secondSkip, timeSpeed, gObjs) => {
     var aPolar = {r: obj.position.burst.a, dec: (obj.position.dec + obj.position.pitchDec) % 360};
-    var gPolar = {r: -getLocalG(obj, gObjs), dec: obj.position.dec};
+    var gPolar = getLocalG(obj, gObjs); //{r: -getLocalG(obj, gObjs), dec: obj.position.dec};
     var vPolar = {r: obj.position.vR, dec: obj.position.vDec};
     var posPolar = {r: obj.position.r, dec: obj.position.dec};
     if ((posPolar.r < gObjs[0].r) || (posPolar.r === gObjs[0].r && aPolar.r <= 0)) {
@@ -64,12 +64,26 @@ let moveSvg = (helpCalc) => {
     obj.position.dec = helpCalc.roundM(posPolar.dec);
 
     function getLocalG(obj, gObjs) {
-      console.log(gObjs[0].mass)
-      const localG = (6.67 * Math.pow(10, -11)) * gObjs[0].mass / (obj.position.r ** 2)  
-      //const localG2 = (6.67 * Math.pow(10, -11)) * gObjs[1].mass / (obj.position.r ** 2)  
-      //todo: replace obj.position.r by distance ship/mon
-      //console.log('localG2=', localG2)
-      return localG;
+
+      // Earth
+      const mass = gObjs[0].mass;
+      const dist = obj.position.r;
+      const gR = (6.67 * Math.pow(10, -11)) * mass / (dist ** 2);
+      const gDec = (180 - obj.position.dec);
+      //console.log('gEarth=', {r: gR, dec: gDec})
+      
+      //Moon
+      const mass2 = gObjs[1].mass;
+      const posCartShip = {r: obj.position.r, dec: obj.position.dec};
+      const posCartCenter = {r: gObjs[1].position.r, dec: gObjs[1].position.dec};
+      const dist2 = helpCalc.distPol(posCartShip, posCartCenter);
+      const gR2 = (6.67 * Math.pow(10, -11)) * mass2 / (dist2.r ** 2);
+      const gDec2 = dist2.dec;
+      //console.log('gMoon=', {r: gR2, dec: gDec2})
+
+      const gPol = helpCalc.addPol({r: gR, dec: gDec}, {r: gR2, dec: gDec2})
+
+      return gPol
     }
 
   }
