@@ -2,6 +2,7 @@
 let renderSvg = (helpCalc) => {
 
   let canvasNode;
+  let objCenter;
   let viewCenter;
   let burstNode;
 
@@ -12,10 +13,8 @@ let renderSvg = (helpCalc) => {
     viewCenter = getViewCenter(canvasNode);
   }
 
-  let create = (objs, zoom) => {
-    // called at init
-    
-    let keys = Object.keys(objs); // children before to hender behind
+  let create = (objs, zoom, refObj) => {
+    let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
       if (obj.objList) {
@@ -24,35 +23,35 @@ let renderSvg = (helpCalc) => {
         })
       }
     });
-    update(objs, zoom);
+    update(objs, zoom, refObj);
   }
 
-  const createOne = (obj, zoom) => {
-    // called at init
-
+  const createOne = (obj, zoom, refObj) => {
     obj.objList.forEach(obj => {
       createObj(canvasNode, obj);
     })
     
-    updateObj(obj.objList[0], zoom)
+    updateObj(obj.objList[0], zoom, refObj)
   }
 
-  const updateOne = (obj, zoom) => {
-    updateObj(obj.objList[0], zoom)
+  const updateOne = (obj, zoom, refObj) => {
+    updateObj(obj.objList[0], zoom, refObj)
   }
 
-  const update = (objs, zoom) => {
-    // called at init and each loop iteracion
-
+  const update = (objs, zoom, refObj) => {
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
 
-      if (obj.renderType === 'svg') updateObj(obj, zoom);
+      if (obj.renderType === 'svg') updateObj(obj, zoom, refObj);
       obj.objList.forEach(obj => {
-        updateObj(obj, zoom);
+        updateObj(obj, zoom, refObj);
       })
     });
+  }
+
+  const setObjCenter = (obj) => {
+    objCenter = obj;
   }
 
   function createObj(canvasNode, obj) {
@@ -98,13 +97,13 @@ let renderSvg = (helpCalc) => {
     if (obj.id === 'shipBurst') burstNode = newNode;
   }
 
-  function updateObj(obj, zoom) {
+  function updateObj(obj, zoom, refObj) {
     const cart = helpCalc.fromPolar({
       r: obj.position.r,
       dec: obj.position.dec
     });
 
-    const trim = getTrim(zoom);
+    const trim = getTrim(zoom, refObj);
 
     const svgTag = obj.render.format;
     let node = document.getElementById(obj.id);
@@ -134,8 +133,8 @@ let renderSvg = (helpCalc) => {
   }
 
   function getSvgCanvasNode(canvasNode) {
-
     var canvasSvgNode;
+
     for (let i = 0; i < canvasNode.children.length; i++) {
       if (canvasNode.children[i].id === 'canvasSvg') canvasSvgNode = canvasNode.children[i];
     }
@@ -158,16 +157,16 @@ let renderSvg = (helpCalc) => {
     }
   }
 
-  function getTrim(zoom) {
+  function getTrim(zoom, refObj) {
+    let refCar = helpCalc.fromPolar({r: refObj.position.r, dec: refObj.position.dec})
 
-    var trimY = 6378100;
-    if (zoom <10000 ) trimY = 6378100 + 200 * zoom ;
-    if (zoom > 100000 / 2 ) trimY = 6378100 / 2;
-    if (zoom > 100000 ) trimY = 0;
+    let trimY = refObj.r;
+    if (zoom < 10000 ) trimY = refObj.r + 200 * zoom ;
+    if (zoom > objCenter.r ) trimY = 0;
 
-    let trim = {
-      x: 0 / zoom,
-      y: trimY  / zoom
+    const trim = {
+      x: -refCar.x / zoom,
+      y: (refCar.y + trimY)  / zoom
     }
     return trim;
   }
@@ -176,7 +175,8 @@ let renderSvg = (helpCalc) => {
     create,
     createOne,
     update,
-    updateOne
+    updateOne,
+    setObjCenter
   }
 }
 

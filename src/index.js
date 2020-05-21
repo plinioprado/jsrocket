@@ -16,14 +16,14 @@ var app = function(deps){
   var moveSvg = deps.moveSvg(helpCalc);
   var renderSvg = deps.renderSvg(deps.helpCalc)
   var panel = getPanel(objs.earth);
-  var ship1 = deps.ship1();
+  var ship1Data = deps.ship1();
+  var ship1 = ship1Data.objList[0];
 
   moveSvg.init(objs);
 
-  var canvasNode = document.getElementById('canvas'); // leave until ship is svg
-
-  renderSvg.create(objs, canvas.state.zoom);
-  renderSvg.createOne(ship1, canvas.state.zoom);
+  renderSvg.setObjCenter(objs.earth.objList[2])
+  renderSvg.create(objs, canvas.state.zoom, canvas.getRefObj(objs));
+  renderSvg.createOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs));
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
@@ -36,14 +36,14 @@ var app = function(deps){
       canvas.state.time += (canvas.state.secondSkip * canvas.state.timeSpeed);
 
       moveSvg.move(canvas.state.secondSkip, canvas.state.timeSpeed);
-      renderSvg.update(objs, canvas.state.zoom);
+      renderSvg.update(objs, canvas.state.zoom, canvas.getRefObj(objs));
 
-      ship1.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
-      moveSvg.moveOne(ship1.objList[0], canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
-      renderSvg.updateOne(ship1, canvas.state.zoom);
+      ship1Data.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
+      moveSvg.moveOne(ship1, canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
+      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs));
       panel.update();
 
-      if (ship1.objList[0].position.crash) {
+      if (ship1.position.crash) {
         alert('ship crashed');
         return;
       }
@@ -87,21 +87,22 @@ var app = function(deps){
   function verifyKey(e) {
     var keyCode = e.code;
     if (keyCode === 'KeyP') canvas.playStop();
-    else if (keyCode === 'ArrowUp') ship1.addPitch(10);
-    else if (keyCode === 'ArrowDown') ship1.addPitch(-10);
-    else if (keyCode === 'KeyA') ship1.addBurstTNext(1);
-    else if (keyCode === 'KeyZ') ship1.addBurstTNext(-1);
+    else if (keyCode === 'ArrowUp') ship1Data.addPitch(10);
+    else if (keyCode === 'ArrowDown') ship1Data.addPitch(-10);
+    else if (keyCode === 'KeyA') ship1Data.addBurstTNext(1);
+    else if (keyCode === 'KeyZ') ship1Data.addBurstTNext(-1);
     else if (keyCode === 'Minus') canvas.zoomMultiply(2);
     else if (keyCode === 'Equal') canvas.zoomMultiply(.5);
     else if (keyCode === 'Period') canvas.timeMultiply(2);
     else if (keyCode === 'Comma') canvas.timeMultiply(.5);
+    else if (keyCode === 'KeyV') canvas.setRef();
     else if (keyCode.substring(0,5) === 'Digit') {
-      ship1.setBurstANext(keyCode.replace('Digit', ''))
+      ship1Data.setBurstANext(keyCode.replace('Digit', ''))
     }
     if (!canvas.state.play) return;
 
     if (keyCode === 'Space') {
-      ship1.burstStart();
+      ship1Data.burstStart();
     }
   }
 
@@ -116,12 +117,14 @@ var app = function(deps){
       time: 0, // time passed (s)
       timeSpeed: 1,
       secondSkip: 0.1, // each time loop timming (s)
+      ref: 'earth'
     }
 
     var zoomMultiply = function(times) {
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
-      renderSvg.update(deps.objs, state.zoom)
+      renderSvg.update(deps.objs, state.zoom, canvas.getRefObj(objs));
+      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs));
     }
 
     var timeMultiply = function(times) {
@@ -139,11 +142,25 @@ var app = function(deps){
       if (canvas.state.play) loop();
     }
 
+    var setRef = function() {
+      if (state.ref === 'earth') state.ref = 'moon';
+      else state.ref = 'earth';
+    }
+
+    var getRefObj = function(objs) {
+      var obj = 'hey';
+      if (state.ref === 'earth') obj = objs.earth.objList[2];
+      else obj = objs.moon.objList[0];
+      return obj;
+    }
+
     return {
       playStop,
       state,
       timeMultiply,
-      zoomMultiply
+      zoomMultiply,
+      setRef,
+      getRefObj
     }
   }
 
@@ -212,6 +229,9 @@ var app = function(deps){
       },
       timePlay: function() {
         return canvas.state.play ? 'Pause' : 'Play';
+      },
+      ref: function() {
+        return canvas.state.ref;
       }
     }
 
@@ -219,9 +239,9 @@ var app = function(deps){
       if (key) {
         document.getElementById(key).innerText = content[key]();
       } else {
-        position = ship1.objList[0].position;
+        position = ship1.position;
         var keys = Object.keys(content);
-        keys.forEach(element => {
+        keys.forEach(function(element) {
           document.getElementById(element).innerText = content[element]();
         });
       }
