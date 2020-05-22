@@ -124,4 +124,57 @@ menu a:hover {
 	text-align: center;
 }
 
+/* modal */
+
+#modal {
+  z-index: 10;
+  position: absolute;
+  top: 10%;
+  left:20%;
+  right:20%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  border-color: white;
+  border-width: 2px;
+  border-style: solid;
+  color: white;
+  background-color: black;
+}
+
+#modalcloser {
+  top: 0;
+  right: 0;
+  padding-top: 1em;
+  padding-right: 1em;
+  text-align: right;
+  font-size: .8em;
+}
+
+#modalcontent {
+  padding: 2em;
+}
+
+#modalcloser a:link {
+  color: white;
+  text-decoration: underline;
+}
+
+#modalcloser a:visited {
+	color: white;
+}
+
+#modalcloser a:hover {
+	color: lightcyan;
+  text-decoration: underline;
+}
+
+.modalClosed {
+  visibility: hidden;
+}
+
+.modalOpen {
+  visibility: visible;
+}
+
 

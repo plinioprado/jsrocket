@@ -3,6 +3,14 @@ let ship1 = () => {
   const objList = [
     {
       id: 'ship1',
+      panel: {
+        gEarth: 9.8,
+        gMoon: 0,
+        altEarth: 0,
+        altMoon: 0,
+        headEarth: 0,
+        headMoon: 0
+      },
       position: {
         r: 6378100, // distance (m)
         dec: 0, // declination (deg)

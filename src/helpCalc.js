@@ -47,9 +47,11 @@ var helpCalc = {
 
     const obj1Car = fromPolar(obj1Pol);
     const obj2Car = fromPolar(obj2Pol);
+    const dec = (obj1Pol.dec * obj1Pol.r + obj1Pol.dec * obj1Pol.r) / (obj1Pol.r + obj1Pol.r)
+
     const dist = {
       r: Math.sqrt(Math.abs(obj2Car.x + obj1Car.x) ** 2 + Math.abs(obj2Car.y + obj1Car.y) ** 2),
-      dec: Math.atan((obj2Car.x + obj1Car.x) / (obj2Car.y + obj1Car.y)) / (Math.PI/180)
+      dec: dec
     }
 
     return dist;

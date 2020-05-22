@@ -44,14 +44,14 @@ var app = function(deps){
       panel.update();
 
       if (ship1.position.crash) {
-        alert('ship crashed');
+        modalOpen('ship crashed. Reload game.')
         return;
       }
       
       if (!checkTimeOut()) loop();
     }, 1000 * canvas.state.secondSkip);
   }
-  
+
   function checkTimeOut() {
     var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
     var d = new Date(0, 0, 0, 0, 0, 0, 0);
@@ -59,7 +59,7 @@ var app = function(deps){
     var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
     
     if (days > 365) {
-      alert('Exausted fuel after 1 year of flight. Reload game.');
+      modalOpen('Exausted fuel after 1 year of flight. Reload game.');
       return true;
     }
     return false;
@@ -80,6 +80,7 @@ var app = function(deps){
         else if (action === 'zoomPlus') canvas.zoomMultiply(.5);
         else if (action === 'timePlus') canvas.timeMultiply(2);
         else if (action === 'timeMinus') canvas.timeMultiply(.5);
+        else if (action === 'modalClose') modalClose();
       }
     }
   }
@@ -167,11 +168,12 @@ var app = function(deps){
   function getPanel(earth) {
 
     var position = {};
+    var panel = {}
 
     var content = { // xxx
       alt: function() {
+        var alt = canvas.state.ref === 'earth' ? panel.altEarth : panel.altMoon;
         var unit = 'm';
-        var alt = position.r - earth.r;
         if (alt > 1000) {
           alt /=  1000
           unit = 'km';
@@ -180,7 +182,9 @@ var app = function(deps){
         return Math.round(alt).toLocaleString('en-US') + unit;
       },
       long: function() {
-        return convLong(position.dec);
+        var long = canvas.state.ref === 'earth' ? panel.headEarth : panel.headMoon;
+        return convLong((180  - long) % 360);
+        //return convLong(position.dec);
       },
       pitch: function() {
         return convDeg(toDeg180(90 - position.pitchDec));
@@ -194,6 +198,9 @@ var app = function(deps){
         var vDec = position.vDec + position.dec;
         var v = position.vR * Math.sin(vDec * (Math.PI/180))
         return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
+      },
+      gLocal: function() {
+        return (canvas.state.ref === 'earth' ? 9.8 : 9.8/6).toFixed(2) + 'm/s2';
       },
       speed: function() {
         return Math.round(position.vR * 3.6).toLocaleString('en-US') + 'km/h';
@@ -240,6 +247,7 @@ var app = function(deps){
         document.getElementById(key).innerText = content[key]();
       } else {
         position = ship1.position;
+        panel = ship1.panel;
         var keys = Object.keys(content);
         keys.forEach(function(element) {
           document.getElementById(element).innerText = content[element]();
@@ -280,6 +288,20 @@ var app = function(deps){
     return {
       update
     }
+  }
+
+  function modalClose() {
+    var classList = document.getElementById('modal').classList;
+    classList.remove('modalOpen');
+    classList.add('modalClosed');
+    document.getElementById('modalcontent').innerText = '';
+  }
+
+  function modalOpen(msg) {
+    var classList = document.getElementById('modal').classList;
+    classList.remove('modalClosed')
+    classList.add('modalOpen');
+    document.getElementById('modalcontent').innerText = msg
   }
 
 }

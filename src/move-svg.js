@@ -51,6 +51,7 @@ let moveSvg = (helpCalc) => {
 
     vPolar = helpCalc.toPolar(vCart);
     posPolar = helpCalc.toPolar(posCart);
+    console.log('obj=', obj.panel)
     if (posPolar.r <= gObjs[0].r && vPolar.r > (50 / 3.6)) {
       vPolar.r = 0;
       vPolar.dec = 0;
@@ -70,7 +71,10 @@ let moveSvg = (helpCalc) => {
       const dist = obj.position.r;
       const gR = (6.67 * Math.pow(10, -11)) * mass / (dist ** 2);
       const gDec = (180 - obj.position.dec);
-      //console.log('gEarth=', {r: gR, dec: gDec})
+
+      obj.panel.gEarth = gR;
+      obj.panel.altEarth = dist - obj.position.r;
+      obj.panel.headEarth = gDec;
       
       //Moon
       const mass2 = gObjs[1].mass;
@@ -79,9 +83,12 @@ let moveSvg = (helpCalc) => {
       const dist2 = helpCalc.distPol(posCartShip, posCartCenter);
       const gR2 = (6.67 * Math.pow(10, -11)) * mass2 / (dist2.r ** 2);
       const gDec2 = dist2.dec;
-      //console.log('gMoon=', {r: gR2, dec: gDec2})
 
-      const gPol = helpCalc.addPol({r: gR, dec: gDec}, {r: gR2, dec: gDec2})
+      obj.panel.gMoon = gR2;
+      obj.panel.altMoon = dist2.r - gObjs[1].r;
+      obj.panel.headMoon = gDec2;
+
+      const gPol = helpCalc.addPol({r: gR, dec: gDec}, {r: gR2, dec: gDec2});
 
       return gPol
     }
