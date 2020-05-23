@@ -8,9 +8,12 @@ var helpCalc = {
   },
 
   toPolar: (cart) => {
+
+    let dec = (Math.atan2(cart.x, cart.y) / (Math.PI/180)) % 360;
+    if (dec < 0) dec+= 360
     return {
       r: ((cart.x ** 2 + cart.y ** 2) ** .5),
-      dec: (Math.atan2(cart.x, cart.y) / (Math.PI/180))
+      dec: dec
     }
   },
 
@@ -47,12 +50,7 @@ var helpCalc = {
 
     const obj1Car = fromPolar(obj1Pol);
     const obj2Car = fromPolar(obj2Pol);
-    const dec = (obj1Pol.dec * obj1Pol.r + obj1Pol.dec * obj1Pol.r) / (obj1Pol.r + obj1Pol.r)
-
-    const dist = {
-      r: Math.sqrt(Math.abs(obj2Car.x + obj1Car.x) ** 2 + Math.abs(obj2Car.y + obj1Car.y) ** 2),
-      dec: dec
-    }
+    const dist = toPolar({x: (obj1Car.x + obj2Car.x), y: (obj1Car.y + obj2Car.y)})
 
     return dist;
 
@@ -60,6 +58,13 @@ var helpCalc = {
      return {
         x: polar.r * Math.sin(polar.dec * Math.PI/180),
         y: polar.r * Math.cos(polar.dec * Math.PI/180)
+      }
+    }
+
+    function toPolar(cart) { // todo: eliminate this
+      return {
+        r: ((cart.x ** 2 + cart.y ** 2) ** .5),
+        dec: (Math.atan2(cart.x, cart.y) / (Math.PI/180))
       }
     }
   },

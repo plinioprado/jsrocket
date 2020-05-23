@@ -51,11 +51,17 @@ let moveSvg = (helpCalc) => {
 
     vPolar = helpCalc.toPolar(vCart);
     posPolar = helpCalc.toPolar(posCart);
-    console.log('obj=', obj.panel)
-    if (posPolar.r <= gObjs[0].r && vPolar.r > (50 / 3.6)) {
+
+    if ((posPolar.r <= gObjs[0].r // indside Earth surface
+      && vPolar.dec > 90 && vPolar.dec < 270 // descending
+      && vPolar.r > (50 / 3.6)) // faster than 50km/h
+      ||
+      (obj.panel.altMoon <= 0 // indside Moon surface
+        && vPolar.r > (50 / 3.6)) // faster than 50km/h
+      ) { 
+
       vPolar.r = 0;
       vPolar.dec = 0;
-      posPolar.r = gObjs[0].r - 10;
       obj.position.crash = true;
     }
 
@@ -64,6 +70,8 @@ let moveSvg = (helpCalc) => {
     obj.position.r = helpCalc.roundM(posPolar.r);
     obj.position.dec = helpCalc.roundM(posPolar.dec);
 
+    obj.panel.altEarth = obj.position.r - gObjs[0].r;
+
     function getLocalG(obj, gObjs) {
 
       // Earth
@@ -71,9 +79,9 @@ let moveSvg = (helpCalc) => {
       const dist = obj.position.r;
       const gR = (6.67 * Math.pow(10, -11)) * mass / (dist ** 2);
       const gDec = (180 - obj.position.dec);
+      if (dist < gObjs[0].r)  gR = 0;
 
       obj.panel.gEarth = gR;
-      obj.panel.altEarth = dist - obj.position.r;
       obj.panel.headEarth = gDec;
       
       //Moon

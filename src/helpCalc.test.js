@@ -58,10 +58,9 @@ test('addPol sum a large downward and a small vertor', () => {
   const obj1 = {r: 1, dec: 1}
   const obj2 = {r: 1000000000, dec: 180};
   const result = calc.default.addPol(obj1, obj2);
-  result.dec = Math.round(result.dec * 1000000) / 1000000;
+  result.dec = Math.round(result.dec);
+  result.r = Math.round(result.r * 1000)/1000;
 
-	expect(result).toEqual({
-    r: 1000000000,
-    dec: -180
-  })
+  expect(result.r).toBeCloseTo(1000000000 - 1, 6);
+  expect(result.dec).toBe(180);
 });

@@ -177,14 +177,12 @@ var app = function(deps){
         if (alt > 1000) {
           alt /=  1000
           unit = 'km';
-
         }
         return Math.round(alt).toLocaleString('en-US') + unit;
       },
       long: function() {
         var long = canvas.state.ref === 'earth' ? panel.headEarth : panel.headMoon;
         return convLong((180  - long) % 360);
-        //return convLong(position.dec);
       },
       pitch: function() {
         return convDeg(toDeg180(90 - position.pitchDec));
@@ -200,7 +198,7 @@ var app = function(deps){
         return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
       },
       gLocal: function() {
-        return (canvas.state.ref === 'earth' ? 9.8 : 9.8/6).toFixed(2) + 'm/s2';
+        return (canvas.state.ref === 'earth' ? panel.gEarth : panel.gMoon).toFixed(2) + 'm/s2';
       },
       speed: function() {
         return Math.round(position.vR * 3.6).toLocaleString('en-US') + 'km/h';
