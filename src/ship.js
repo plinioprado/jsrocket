@@ -95,7 +95,9 @@ let ship1 = () => {
   }
 
   const addPitch = (add) => {
-    objList[0].position.pitchDec = (objList[0].position.pitchDec += add) % 360;
+    let pitch = (objList[0].position.pitchDec + add) % 360;
+    if (pitch < 0) pitch += 360
+    objList[0].position.pitchDec = pitch;
   }
 
   const addBurstTNext = (add) => {
