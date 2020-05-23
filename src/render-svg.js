@@ -122,10 +122,10 @@ let renderSvg = (helpCalc) => {
       node.setAttributeNS(null, 'width', widthPx);
       node.setAttributeNS(null, 'height', heightPx);
     } else if (obj.id === 'ship1') {
-      const x = (viewCenter.x + trim.x + cart.x/zoom - 10);
+      const x = (viewCenter.x + trim.x + cart.x/zoom - 5);
       const y = (viewCenter.y + trim.y - cart.y / zoom - 10);
       const pitch = obj.position.pitchDec;
-      const transform = `translate(${x},${y}) rotate(${pitch})`;
+      const transform = `translate(${x},${y}) rotate(${pitch},5,5)`;
       const visibility = obj.position.burst.a > 0 ?  'visible' : 'hidden';
       node.setAttributeNS(null, 'transform', transform);
       burstNode.setAttributeNS(null, 'visibility', visibility);
@@ -158,16 +158,30 @@ let renderSvg = (helpCalc) => {
   }
 
   function getTrim(zoom, refObj) {
-    let refCar = helpCalc.fromPolar({r: refObj.position.r, dec: refObj.position.dec})
-
-    let trimY = refObj.r;
-    if (zoom < 10000 ) trimY = refObj.r + 200 * zoom ;
-    if (zoom > objCenter.r ) trimY = 0;
-
-    const trim = {
-      x: -refCar.x / zoom,
-      y: (refCar.y + trimY)  / zoom
+    const refCar = helpCalc.fromPolar({r: refObj.position.r, dec: refObj.position.dec})
+    const canvasMinSize = Math.min(canvasNode.offsetWidth, canvasNode.offsetHeight) * zoom
+    const refObjWidth = refObj.r * 2;
+    
+    let trim;
+    const ratio = refObjWidth/canvasMinSize;
+    if (ratio > 5) { // close, surface on botton
+      trim = {
+        x: -refCar.x / zoom,
+        y: refCar.y / zoom + refObj.r / zoom + 200
+      } 
+    } else if (ratio < .5) { // distant, center
+      trim = {
+        x: -refCar.x / zoom,
+        y: refCar.y / zoom
+      }
+    } 
+    else {
+      trim = { // intermediate
+        x: -refCar.x / zoom,
+        y: refCar.y / zoom + refObj.r / zoom + 20
+      } 
     }
+
     return trim;
   }
 

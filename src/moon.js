@@ -1,5 +1,5 @@
 var moon = {
-	id: 'moon',
+	mainId: 'moon',
 	objList: [
 		{
 			id: 'moon',
@@ -16,22 +16,7 @@ var moon = {
 				format: 'circle',
 				color: '#F5F3CE'
 			}
-		},
-		// {
-		// 	id: 'moonOrbit',
-		// 	renderType: 'svg',
-		// 	r: 384000000, // m
-		// 	position: {
-		// 		r: 0, // distance from center (m)
-		// 		dec: 0, // declination (deg), could be any value because r = 0
-		// 	},
-		// 	render: {
-		// 		format: 'circle',
-		// 		color: 'transparent',
-		// 		stroke: 'white',
-		// 		strokeDasharray: '1,4'
-		// 	}
-		// }
+		}
 	]
 }
 

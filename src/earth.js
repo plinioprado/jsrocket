@@ -1,7 +1,5 @@
 var earth = {
-  id: 'earth',
-	r: 6378100, // for legacy move and render div (m)
-	g: 9.80665, // for legacy move and render div (m/s2)
+  mainId: 'earth',
   objList: [
 		{
 			id: 'earthLeo',
