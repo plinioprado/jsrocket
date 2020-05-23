@@ -27,7 +27,7 @@ test('addPol sum similar vectors', () => {
   })
 });
 
-test('addPol sum a small and a large vertor', () => {
+test('addPol sum a small and a large vector', () => {
 
   const obj1 = {r: 1000000000, dec: 0};
   const obj2 = {r: 1, dec: 90}
@@ -40,7 +40,7 @@ test('addPol sum a small and a large vertor', () => {
   })
 });
 
-test('addPol sum a large and a small vertor', () => {
+test('addPol sum a large and a small vector', () => {
 
   const obj1 = {r: 1, dec: 90}
   const obj2 = {r: 1000000000, dec: 0};
@@ -53,7 +53,7 @@ test('addPol sum a large and a small vertor', () => {
   })
 });
 
-test('addPol sum a large downward and a small vertor', () => {
+test('addPol sum a large downward and a small vector', () => {
 
   const obj1 = {r: 1, dec: 1}
   const obj2 = {r: 1000000000, dec: 180};

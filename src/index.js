@@ -301,7 +301,6 @@ var app = function(deps){
     classList.add('modalOpen');
     document.getElementById('modalcontent').innerText = msg
   }
-
 }
 
 var loadApp = (function() {

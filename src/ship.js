@@ -1,4 +1,5 @@
 let ship1 = () => {
+  const mainId = 'ship1';
 
   const objList = [
     {
@@ -114,6 +115,7 @@ let ship1 = () => {
   }
 
   return {
+    mainId,
     addBurstTNext,
     addPitch,
     burstStart,
