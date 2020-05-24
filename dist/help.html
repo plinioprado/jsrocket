@@ -2,48 +2,51 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-		<title>jsrocket</title>
-		<link rel="stylesheet" href="help.css">
+    <title>jsrocket</title>
+    <link rel="stylesheet" href="help.css">
   </head>
   <body>
-		<menu>
-			<a href="index.html">Game</a>
-		</menu>
-		<main>
-			<h1>JsRocket</h1>
-			<h2>Intro</h2>
-			<p>Spaceship simple flight simulator under phisics calculations available in javascript.</p>
-			<p>The piloting is done rotating the ship and firing jet burts from the tail under controlled accelerations and durations.</p>
-			<p>This simulator can be used with two goals:</p>
-			<ul>
-				<li>Take off, flight a few km high, make some loops and land back in the base descebding at less than 50km/h</li>
-				<li>Take off and manouver to achieve a stable circular orbit above the atmpsphere (until 100km altitude and in blue) and within the Low Earth Orbit (until 2000km altitude and in dark grey,  where most human made satelites are).</li>
-			</ul>
-			<p>If the ship touch Earth descending at more than 50km/h it crashes. After 1 year the fuel exausts.</p>
-			<h2>Ship controls</h2>
-			<ul>
-				<li>'Up arrow': increases ship pitch by 10 degrees, rotating it up</li>
-				<li>'Down arrow': decreases ship pitch by 10 degrees, rotating it down</li>
-				<li>'Space': Fires burst</li>
-				<li>'A': Increases the next burst time by 1s</li>
-				<li>'Z': Decreases the next burst time by 1s</li>
-				<li>'1' to '9': Set the next burst acceleration to, respectively, 1g to 9g</li>
-				<li>'0': A zero burst ('0' then 'space') cut the thrust</li>
-			</ul>
-			<p>You can fire the next burst before the current is over, the current will be cut and replaced by the new</p>
-			<h2>Simulation controls</h2>
-			<ul>
-				<li>'P', or 'Play/Pause' button: Starts or pause the running</li>
-				<li>'+': Manual zoom * 2</li>
-				<li>'-': Manual zoom / 2</li>
-				<li>'&gt;': Time speed * 2</li>
+    <menu>
+      <a href="index.html">Game</a>
+    </menu>
+    <main>
+      <h1>JsRocket</h1>
+      <h2>Intro</h2>
+      <p>Spaceship simple flight simulator under phisics calculations available in javascript.</p>
+      <p>The piloting is done rotating the ship and firing jet burts from the tail under controlled accelerations and durations.</p>
+      <p>This simulator can be used with three goals:</p>
+      <ul>
+        <li>Take off, flight a few km high, make some loops and land back in the base descebding at less than 50km/h</li>
+        <li>Take off and manouver to achieve a stable circular orbit above the atmpsphere (until 100km altitude and in blue) and within the Low Earth Orbit (until 2000km altitude and in dark grey,  where most human made satelites are).</li>
+        <li>Take off and land on the moon</li>
+      </ul>
+      <p>If the ship touch Earth descending at more than 50km/h it crashes. After 1 year the fuel exausts.</p>
+      <h2>Ship controls</h2>
+      <ul>
+        <li>'Up arrow': increases ship pitch by 10 degrees, rotating it up</li>
+        <li>'Down arrow': decreases ship pitch by 10 degrees, rotating it down</li>
+        <li>'Space': Fires burst</li>
+        <li>'A': Increases the next burst time by 1s</li>
+        <li>'Z': Decreases the next burst time by 1s</li>
+        <li>'1' to '9': Set the next burst acceleration to, respectively, 1g to 9g</li>
+        <li>'0': A zero burst ('0' then 'space') cut the thrust</li>
+      </ul>
+      <p>You can fire the next burst before the current is over, the current will be cut and replaced by the new</p>
+      <h2>Simulation controls</h2>
+      <ul>
+        <li>'P', or 'Play/Pause' button: Starts or pause the running</li>
+        <li>'+': Manual zoom * 2</li>
+        <li>'-': Manual zoom / 2</li>
+        <li>'&gt;': Time speed * 2</li>
         <li>'&lt;': Time speed / 2</li>
         <li>'V', Switches view reference between Earth and Moon</li>
-			</ul>
-			<h2>Orbital flying</h2>
-			<p>Orbital flight is about manouvering between circular orbits, mantaining each one requires the right orbital speed (around the earth) for the chosen altitude (ex: ISS orbits at about 400km high at 28.000km/h).</p>
-			<p>The "Time speed" can be set from up too 1000K faster then normal. Important (ex: each ISS complete orbit takes around 90min), but combined with the 9g thrust can easily take the ship to speeds hard to control toward outer space</p>
-			<p>Flying within the atmosphere is not affected by air drag and heating, for now.</p>
-		</main>
-	</body>
+      </ul>
+      <h2>Orbital flying tips</h2>
+      <p>Orbital flight is about manouvering between circular orbits, mantaining each one requires the right orbital speed (around the earth) for the chosen altitude (ex: ISS orbits at about 400km high at 28.000km/h).</p>
+      <p>The "Time speed" can be set from up too 1000K faster then normal. Important (ex: each ISS complete orbit takes around 90min), but combined with the 9g thrust can easily take the ship to speeds hard to control toward outer space</p>
+      <p>Manouvering should be done at low Time speeds, higher ones should be ises to follow the resulting paths</p>
+      <p>Landing on the moon should be done at declination 0 (top), where the zoom require for a smooth final aproach will be available.</p>
+      <p>Flying within the atmosphere is not affected by air drag and heating, for now.</p>
+    </main>
+  </body>
 </html>

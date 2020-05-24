@@ -23,9 +23,8 @@ var app = function(deps){
 
   moveSvg.init(objs);
 
-  renderSvg.setObjCenter(objs.earth.objList[2])
-  renderSvg.create(objs, canvas.state.zoom, canvas.getRefObj(objs));
-  renderSvg.createOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs));
+  renderSvg.create(objs, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
+  renderSvg.createOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs)), canvas.state.ref;
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
@@ -38,11 +37,11 @@ var app = function(deps){
       canvas.state.time += (canvas.state.secondSkip * canvas.state.timeSpeed);
 
       moveSvg.move(canvas.state.secondSkip, canvas.state.timeSpeed);
-      renderSvg.update(objs, canvas.state.zoom, canvas.getRefObj(objs));
+      renderSvg.update(objs, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
 
       ship1Data.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
       moveSvg.moveOne(ship1, canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
-      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs));
+      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
       panel.update();
 
       if (ship1.position.crash) {
@@ -126,8 +125,8 @@ var app = function(deps){
     var zoomMultiply = function(times) {
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
-      renderSvg.update(objs, state.zoom, canvas.getRefObj(objs));
-      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs));
+      renderSvg.update(objs, state.zoom, canvas.getRefObj(objs), canvas.state.ref);
+      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
     }
 
     var timeMultiply = function(times) {
@@ -187,7 +186,8 @@ var app = function(deps){
         return convLong((180  - long) % 360);
       },
       pitch: function() {
-        return formatDeg(helpCalc.toDeg180(90 - position.pitchDec))
+        var pitch = helpCalc.toDeg360(position.pitchDec - position.dec)
+        return formatDeg(helpCalc.toDeg180(90 - pitch ))
       },
       climb: function() {
         var vDec = position.vDec + position.dec;

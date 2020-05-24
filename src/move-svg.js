@@ -29,16 +29,11 @@ let moveSvg = (helpCalc) => {
   const moveOne = (obj, secondSkip, timeSpeed, gObjs) => {
     var aPolar = {
       r: obj.position.burst.a,
-      //dec: helpCalc.toDeg360(obj.position.dec + obj.position.pitchDec)
       dec: obj.position.pitchDec
     };
-    var gPolar = getLocalG(obj, gObjs); //{r: -getLocalG(obj, gObjs), dec: obj.position.dec};
+    var gPolar = getLocalG(obj, gObjs);
     var vPolar = {r: obj.position.vR, dec: obj.position.vDec};
     var posPolar = {r: obj.position.r, dec: obj.position.dec};
-    if ((posPolar.r < gObjs[0].r) || (posPolar.r === gObjs[0].r && aPolar.r <= 0)) {
-      obj.position.r = gObjs[0].r;
-      return;
-    }
 
     var aCart = helpCalc.fromPolar(aPolar);
     var gCart = helpCalc.fromPolar(gPolar);
@@ -53,23 +48,21 @@ let moveSvg = (helpCalc) => {
     vPolar = helpCalc.toPolar(vCart);
     posPolar = helpCalc.toPolar(posCart);
 
-    if ((posPolar.r <= gObjs[0].r // indside Earth surface
-      && vPolar.dec > 90 && vPolar.dec < 270 // descending
-      && vPolar.r > (50 / 3.6)) // faster than 50km/h
-      ||
-      (obj.panel.altMoon <= 0 // indside Moon surface
-        && vPolar.r > (50 / 3.6)) // faster than 50km/h
-      ) { 
-
+    //if (posPolar.r <= gObjs[0].r // indside Earth surface
+    if (obj.panel.altEarth <= 0 && vPolar.r !== 0) { 
+        vPolar.r = 0;
+        vPolar.dec = 0;
+        if (vPolar.r > (50 / 3.6)) obj.position.crash = true;
+    } else if (obj.panel.altMoon <= 0 && vPolar.r !== 0) {
       vPolar.r = 0;
       vPolar.dec = 0;
-      obj.position.crash = true;
+      if (vPolar.r > (1000 / 3.6)) obj.position.crash = true;
     }
 
-    obj.position.vR = helpCalc.roundM(vPolar.r);
-    obj.position.vDec = helpCalc.roundM(vPolar.dec);
-    obj.position.r = helpCalc.roundM(posPolar.r);
-    obj.position.dec = helpCalc.roundM(posPolar.dec);
+    obj.position.vR = vPolar.r;
+    obj.position.vDec = vPolar.dec;
+    obj.position.r = posPolar.r;
+    obj.position.dec = posPolar.dec;
 
     obj.panel.altEarth = obj.position.r - gObjs[0].r;
 
