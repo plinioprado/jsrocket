@@ -1,4 +1,7 @@
-const calc = require('./helpCalc');
+const getHelpCalc = require('./helpCalc');
+const calc = getHelpCalc();
+
+// recent transfrmatin of repCalc from object to function broke the tests.
 
 test('is an object', () => {
   expect(calc).toMatchObject(expect.anything())
