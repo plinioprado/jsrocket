@@ -27,13 +27,27 @@ let moveSvg = (helpCalc) => {
   }
 
   const moveOne = (obj, secondSkip, timeSpeed, gObjs) => {
-    var aPolar = {
-      r: obj.position.burst.a,
-      dec: obj.position.pitchDec
-    };
-    var gPolar = getLocalG(obj, gObjs);
+
+    var aPolar = {r: obj.position.burst.a, dec: obj.position.pitchDec};
     var vPolar = {r: obj.position.vR, dec: obj.position.vDec};
     var posPolar = {r: obj.position.r, dec: obj.position.dec};
+
+    var altEarth = posPolar.r - gObjs[0].r;
+    var gPolar = altEarth > 0 ? getLocalG(obj, gObjs) : {r: 0, dec: 0};
+
+    // Landing
+    if (altEarth < 0 && vPolar.r !== 0) {  
+      console.log('landed earth', obj.panel.altEarth)
+      obj.position.vR = 0;
+      obj.position.r = gObjs[0].r;
+      if (vPolar.r > (50 / 3.6)) obj.position.crash = true;
+      return;
+    } else if (obj.panel.altMoon < 0 && vPolar.r !== 0) {
+      console.log('landed moon', obj.panel.altMoon)
+      obj.position.vR = 0;
+      if (vPolar.r > (1000 / 3.6)) obj.position.crash = true;
+      return;
+    }
 
     var aCart = helpCalc.fromPolar(aPolar);
     var gCart = helpCalc.fromPolar(gPolar);
@@ -47,53 +61,41 @@ let moveSvg = (helpCalc) => {
 
     vPolar = helpCalc.toPolar(vCart);
     posPolar = helpCalc.toPolar(posCart);
-
-    //if (posPolar.r <= gObjs[0].r // indside Earth surface
-    if (obj.panel.altEarth <= 0 && vPolar.r !== 0) { 
-        vPolar.r = 0;
-        vPolar.dec = 0;
-        if (vPolar.r > (50 / 3.6)) obj.position.crash = true;
-    } else if (obj.panel.altMoon <= 0 && vPolar.r !== 0) {
-      vPolar.r = 0;
-      vPolar.dec = 0;
-      if (vPolar.r > (1000 / 3.6)) obj.position.crash = true;
-    }
+    posPolar.r = Math.round(posPolar.r);
 
     obj.position.vR = vPolar.r;
     obj.position.vDec = vPolar.dec;
     obj.position.r = posPolar.r;
     obj.position.dec = posPolar.dec;
+    obj.panel.altEarth = Math.round(obj.position.r - gObjs[0].r);
+  }
 
-    obj.panel.altEarth = obj.position.r - gObjs[0].r;
+  function getLocalG(obj, gObjs) {
 
-    function getLocalG(obj, gObjs) {
+    // Earth
+    const mass = gObjs[0].mass;
+    const dist = obj.position.r;
+    let gR = (6.67 * Math.pow(10, -11)) * mass / (dist ** 2);
+    const gDec = helpCalc.toDeg360(180 + obj.position.dec);
+    if (dist < gObjs[0].r)  gR = 0;
 
-      // Earth
-      const mass = gObjs[0].mass;
-      const dist = obj.position.r;
-      let gR = (6.67 * Math.pow(10, -11)) * mass / (dist ** 2);
-      const gDec = helpCalc.toDeg360(180 + obj.position.dec);
-      if (dist < gObjs[0].r)  gR = 0;
+    obj.panel.gEarth = gR;
+    obj.panel.headEarth = gDec;
+    
+    //Moon
+    const mass2 = gObjs[1].mass;
+    const posCartShip = {r: obj.position.r, dec: obj.position.dec};
+    const posCartCenter = {r: gObjs[1].position.r, dec: gObjs[1].position.dec};
+    const dist2 = helpCalc.distPol(posCartShip, posCartCenter);
+    const gR2 = (6.67 * Math.pow(10, -11)) * mass2 / (dist2.r ** 2);
+    const gDec2 = helpCalc.toDeg360(180 + dist2.dec);
 
-      obj.panel.gEarth = gR;
-      obj.panel.headEarth = gDec;
-      
-      //Moon
-      const mass2 = gObjs[1].mass;
-      const posCartShip = {r: obj.position.r, dec: obj.position.dec};
-      const posCartCenter = {r: gObjs[1].position.r, dec: gObjs[1].position.dec};
-      const dist2 = helpCalc.distPol(posCartShip, posCartCenter);
-      const gR2 = (6.67 * Math.pow(10, -11)) * mass2 / (dist2.r ** 2);
-      const gDec2 = helpCalc.toDeg360(180 + dist2.dec);
-
-      obj.panel.gMoon = gR2;
-      obj.panel.altMoon = dist2.r - gObjs[1].r;
-      obj.panel.headMoon = gDec2;
-      const gPol = helpCalc.addPol({r: gR, dec: gDec}, {r: gR2, dec: gDec2});
-      
-      return gPol
-    }
-
+    obj.panel.gMoon = gR2;
+    obj.panel.altMoon = Math.round(dist2.r - gObjs[1].r);
+    obj.panel.headMoon = gDec2;
+    const gPol = helpCalc.addPol({r: gR, dec: gDec}, {r: gR2, dec: gDec2});
+    
+    return gPol
   }
 
   return {
