@@ -1,4 +1,4 @@
-let ship1 = () => {
+let ship1 = (helpCalc) => {
   const mainId = 'ship1';
 
   const objList = [
@@ -96,8 +96,7 @@ let ship1 = () => {
   }
 
   const addPitch = (add) => {
-    let pitch = (objList[0].position.pitchDec + add) % 360;
-    if (pitch < 0) pitch += 360
+    let pitch = helpCalc.toDeg360(objList[0].position.pitchDec + add);
     objList[0].position.pitchDec = pitch;
   }
 
