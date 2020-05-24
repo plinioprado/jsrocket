@@ -5,18 +5,20 @@ import moon from './moon';
 import iss from './iss';
 import ship1 from './ship';
 
-import helpCalc from './helpCalc';
+import getHelpCalc from './helpCalc';
 
 document.onLoad = loadApp;
 
 var app = function(deps){
 
   var objs = deps.objs;
-  var canvas = getCanvas();
+  var helpCalc = deps.getHelpCalc()
   var moveSvg = deps.moveSvg(helpCalc);
-  var renderSvg = deps.renderSvg(deps.helpCalc)
-  var panel = getPanel(objs.earth);
-  var ship1Data = deps.ship1();
+  var renderSvg = deps.renderSvg(helpCalc);
+  var ship1Data = deps.ship1(helpCalc);
+  var canvas = getCanvas();
+  var panel = getPanel(helpCalc);
+
   var ship1 = ship1Data.objList[0];
 
   moveSvg.init(objs);
@@ -124,7 +126,7 @@ var app = function(deps){
     var zoomMultiply = function(times) {
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
-      renderSvg.update(deps.objs, state.zoom, canvas.getRefObj(objs));
+      renderSvg.update(objs, state.zoom, canvas.getRefObj(objs));
       renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs));
     }
 
@@ -165,7 +167,7 @@ var app = function(deps){
     }
   }
 
-  function getPanel(earth) {
+  function getPanel(helpCalc) {
 
     var position = {};
     var panel = {}
@@ -185,7 +187,7 @@ var app = function(deps){
         return convLong((180  - long) % 360);
       },
       pitch: function() {
-        return convDeg(toDeg180(90 - position.pitchDec));
+        return formatDeg(helpCalc.toDeg180(90 - position.pitchDec))
       },
       climb: function() {
         var vDec = position.vDec + position.dec;
@@ -204,8 +206,8 @@ var app = function(deps){
         return Math.round(position.vR * 3.6).toLocaleString('en-US') + 'km/h';
       },
       burstA: function() {
-        var a = (position.burst.a / earth.g).toFixed(0);
-        var aNext = (position.burst.aNext / earth.g).toFixed(0);
+        var a = (position.burst.a / 9.8).toFixed(0);
+        var aNext = (position.burst.aNext / 9.8).toFixed(0);
         return a + 'g (' + aNext + 'g)';
       },
       burstT: function() {
@@ -223,7 +225,7 @@ var app = function(deps){
         return days + 'd ' + d.toLocaleTimeString('en-US', { hour12: false });
       },
       head: function() {
-        return convDeg(position.vDec);
+        return formatDeg(position.vDec);
       },
       zoom: function() {
         var zoom  = canvas.state.zoom
@@ -253,7 +255,7 @@ var app = function(deps){
       }
     }
 
-    function convDeg(deg) {
+    function formatDeg(deg) {
       var txt = Math.round(deg) + String.fromCharCode(176);
       return txt;
     }
@@ -275,12 +277,6 @@ var app = function(deps){
       if (d >= 1000) txt = parseInt(d/1000) + 'k';
       else if (d >= 1000000) txt = parseInt(d/1000000) + 'M';
       return txt;
-    }
-
-    function toDeg180(deg) {
-      var ret = deg % 360;
-      if (ret > 180) ret = ret - 360;
-      return ret;
     }
 
     return {
@@ -314,7 +310,7 @@ var loadApp = (function() {
       moon: moon,
       iss: iss,
     },
-    helpCalc: helpCalc
+    getHelpCalc: getHelpCalc
   }
 
   app(deps);

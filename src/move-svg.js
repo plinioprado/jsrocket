@@ -3,7 +3,6 @@ let moveSvg = (helpCalc) => {
   let data = [];
 
   function init(objs) {
-    // called at init
 
     let keys = Object.keys(objs);
     for (let i = 0; i < keys.length; i++) {
@@ -20,8 +19,6 @@ let moveSvg = (helpCalc) => {
   }
 
   const move = (secondSkip, timeSpeed) => {
-    // called at init and each loop iteracion
-
     for (let i = 0; i < data.length; i++) {
       let position = data[i];
       position.r += position.vR * secondSkip * timeSpeed;
@@ -30,7 +27,11 @@ let moveSvg = (helpCalc) => {
   }
 
   const moveOne = (obj, secondSkip, timeSpeed, gObjs) => {
-    var aPolar = {r: obj.position.burst.a, dec: (obj.position.dec + obj.position.pitchDec) % 360};
+    var aPolar = {
+      r: obj.position.burst.a,
+      //dec: helpCalc.toDeg360(obj.position.dec + obj.position.pitchDec)
+      dec: obj.position.pitchDec
+    };
     var gPolar = getLocalG(obj, gObjs); //{r: -getLocalG(obj, gObjs), dec: obj.position.dec};
     var vPolar = {r: obj.position.vR, dec: obj.position.vDec};
     var posPolar = {r: obj.position.r, dec: obj.position.dec};
@@ -77,8 +78,8 @@ let moveSvg = (helpCalc) => {
       // Earth
       const mass = gObjs[0].mass;
       const dist = obj.position.r;
-      const gR = (6.67 * Math.pow(10, -11)) * mass / (dist ** 2);
-      const gDec = (180 - obj.position.dec);
+      let gR = (6.67 * Math.pow(10, -11)) * mass / (dist ** 2);
+      const gDec = helpCalc.toDeg360(180 + obj.position.dec);
       if (dist < gObjs[0].r)  gR = 0;
 
       obj.panel.gEarth = gR;
@@ -90,14 +91,13 @@ let moveSvg = (helpCalc) => {
       const posCartCenter = {r: gObjs[1].position.r, dec: gObjs[1].position.dec};
       const dist2 = helpCalc.distPol(posCartShip, posCartCenter);
       const gR2 = (6.67 * Math.pow(10, -11)) * mass2 / (dist2.r ** 2);
-      const gDec2 = dist2.dec;
+      const gDec2 = helpCalc.toDeg360(180 + dist2.dec);
 
       obj.panel.gMoon = gR2;
       obj.panel.altMoon = dist2.r - gObjs[1].r;
       obj.panel.headMoon = gDec2;
-
       const gPol = helpCalc.addPol({r: gR, dec: gDec}, {r: gR2, dec: gDec2});
-
+      
       return gPol
     }
 
