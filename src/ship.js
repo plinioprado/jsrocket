@@ -13,10 +13,10 @@ let ship1 = (helpCalc) => {
         headMoon: 0
       },
       position: {
-        r: 6378100, // distance (m)
-        dec: 0, // declination (deg)
-        vR: 0, // v speed (m/s)
-        vDec: 0, // heading, or v declination (deg)
+        r: 6378100, // 0, // distance (m), (384000000 ** 2 + 1738000 ** 2) ** .5 for moon
+        dec: 0, // d0eclination (deg), 90 - Math.atan(1738000 / 384000000) * (180 / Math.PI) for moon
+        vR: 0, // v speed (m/s), 280 for moon
+        vDec: 0, // heading, or v declination (deg), 180 for moon
         pitchDec: 0, // attitude pitch (deg)
         burst: {
           a: 0,// current burst acceleration (m/s2)
