@@ -31,7 +31,7 @@ var earth = {
 			id: 'earth',
 			renderType: 'svg',
       r: 6378100, // m
-      mass: 5.98 * Math.pow(10, 24), // kg
+      mass: 5.98e24, // kg
 			g: 9.80665, // m/s2
 			position: {
 				r: 0, // distance from center (m)

@@ -54,6 +54,13 @@ var getHelpCalc = () => {
     return ret;
   }
 
+  function getVObj(obj) {
+    // for objs with vDec
+    return {
+      r: Math.atan(obj.position.vDec * Math.PI/180) * obj.position.r,
+      dec: toDeg360(obj.position.dec + 90)
+    };
+  }
 
   function toDeg180(deg) {
     let ret = deg;
@@ -68,7 +75,8 @@ var getHelpCalc = () => {
     roundM,
     addPol,
     toDeg360,
-    toDeg180
+    toDeg180,
+    getVObj
   }
 
 }
