@@ -20,6 +20,8 @@ Next features:
 * Options to move the view center.
 * 'T' activating a trail of the recent trajectory
 
+Moon and iss code is added, but in the current setup their moving and rendering are too heavy for looping every 0.1s. They will be revisited after Ship is moved to svg.
+
 ## Getting Started
 
 Running in an existent server:
