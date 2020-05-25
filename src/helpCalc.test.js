@@ -1,4 +1,7 @@
-const calc = require('./helpCalc');
+const getHelpCalc = require('./helpCalc');
+const calc = getHelpCalc();
+
+// recent transfrmatin of repCalc from object to function broke the tests.
 
 test('is an object', () => {
   expect(calc).toMatchObject(expect.anything())
@@ -27,7 +30,7 @@ test('addPol sum similar vectors', () => {
   })
 });
 
-test('addPol sum a small and a large vertor', () => {
+test('addPol sum a small and a large vector', () => {
 
   const obj1 = {r: 1000000000, dec: 0};
   const obj2 = {r: 1, dec: 90}
@@ -40,7 +43,7 @@ test('addPol sum a small and a large vertor', () => {
   })
 });
 
-test('addPol sum a large and a small vertor', () => {
+test('addPol sum a large and a small vector', () => {
 
   const obj1 = {r: 1, dec: 90}
   const obj2 = {r: 1000000000, dec: 0};
@@ -51,4 +54,16 @@ test('addPol sum a large and a small vertor', () => {
     r: 1000000000,
     dec: 0
   })
+});
+
+test('addPol sum a large downward and a small vector', () => {
+
+  const obj1 = {r: 1, dec: 1}
+  const obj2 = {r: 1000000000, dec: 180};
+  const result = calc.default.addPol(obj1, obj2);
+  result.dec = Math.round(result.dec);
+  result.r = Math.round(result.r * 1000)/1000;
+
+  expect(result.r).toBeCloseTo(1000000000 - 1, 6);
+  expect(result.dec).toBe(180);
 });

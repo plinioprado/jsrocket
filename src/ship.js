@@ -1,13 +1,22 @@
-let ship1 = () => {
+let ship1 = (helpCalc) => {
+  const mainId = 'ship1';
 
   const objList = [
     {
       id: 'ship1',
+      panel: {
+        gEarth: 9.8,
+        gMoon: 0,
+        altEarth: 0,
+        altMoon: 0,
+        headEarth: 0,
+        headMoon: 0
+      },
       position: {
-        r: 6378100, // distance (m)
-        dec: 0, // declination (deg)
-        vR: 0, // v speed (m/s)
-        vDec: 0, // heading, or v declination (deg)
+        r: 6378100, // 0, // distance (m), (384000000 ** 2 + 1738000 ** 2) ** .5 for moon
+        dec: 0, // d0eclination (deg), 90 - Math.atan(1738000 / 384000000) * (180 / Math.PI) for moon
+        vR: 0, // v speed (m/s), 280 for moon
+        vDec: 0, // heading, or v declination (deg), 180 for moon
         pitchDec: 0, // attitude pitch (deg)
         burst: {
           a: 0,// current burst acceleration (m/s2)
@@ -87,7 +96,8 @@ let ship1 = () => {
   }
 
   const addPitch = (add) => {
-    objList[0].position.pitchDec = (objList[0].position.pitchDec += add) % 360;
+    let pitch = helpCalc.toDeg360(objList[0].position.pitchDec + add);
+    objList[0].position.pitchDec = pitch;
   }
 
   const addBurstTNext = (add) => {
@@ -104,6 +114,7 @@ let ship1 = () => {
   }
 
   return {
+    mainId,
     addBurstTNext,
     addPitch,
     burstStart,

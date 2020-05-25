@@ -1,7 +1,5 @@
 var earth = {
-  id: 'earth',
-	r: 6378100, // for legacy move and render div (m)
-	g: 9.80665, // for legacy move and render div (m/s2)
+  mainId: 'earth',
   objList: [
 		{
 			id: 'earthLeo',
@@ -33,7 +31,7 @@ var earth = {
 			id: 'earth',
 			renderType: 'svg',
       r: 6378100, // m
-      mass: 5.98 * Math.pow(10, 24), // kg
+      mass: 5.98e24, // kg
 			g: 9.80665, // m/s2
 			position: {
 				r: 0, // distance from center (m)

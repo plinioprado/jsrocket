@@ -4,6 +4,7 @@ let renderSvg = (helpCalc) => {
   let canvasNode;
   let viewCenter;
   let burstNode;
+  let shipDec;
 
   init()
 
@@ -12,10 +13,8 @@ let renderSvg = (helpCalc) => {
     viewCenter = getViewCenter(canvasNode);
   }
 
-  let create = (objs, zoom) => {
-    // called at init
-    
-    let keys = Object.keys(objs); // children before to hender behind
+  let create = (objs, zoom, refObjs, refId) => {
+    let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
       if (obj.objList) {
@@ -24,34 +23,30 @@ let renderSvg = (helpCalc) => {
         })
       }
     });
-    update(objs, zoom);
+    update(objs, zoom, refObjs, refId);
   }
 
-  const createOne = (obj, zoom) => {
-    // called at init
-
+  const createOne = (obj, zoom, refObjs, refId) => {
     obj.objList.forEach(obj => {
       createObj(canvasNode, obj);
     })
     
-    updateObj(obj.objList[0], zoom)
+    updateObj(obj.objList[0], zoom, refObjs, refId)
   }
 
-  const updateOne = (obj, zoom) => {
-    updateObj(obj.objList[0], zoom)
+  const updateOne = (obj, zoom, refObjs, refId) => {
+    updateObj(obj.objList[0], zoom, refObjs, refId);
+    shipDec = obj.objList[0].position.dec;
   }
 
-  const update = (objs, zoom) => {
-    // called at init and each loop iteracion
-    if (!viewCenter) viewCenter = getViewCenter(canvasNode);
-    
+  const update = (objs, zoom, refObjs, refId) => {
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
-      if (obj.renderType === 'svg') updateObj(obj, zoom);
 
+      if (obj.renderType === 'svg') updateObj(obj, zoom, refObjs, refId);
       obj.objList.forEach(obj => {
-        updateObj(obj, zoom);
+        updateObj(obj, zoom, refObjs, refId);
       })
     });
   }
@@ -71,13 +66,6 @@ let renderSvg = (helpCalc) => {
     let svgns = 'http://www.w3.org/2000/svg';
     let newNode = document.createElementNS(svgns, obj.render.format);
     if (obj.id) newNode.setAttributeNS(null, 'id', obj.id);
-
-    // let keys = Object.keys(obj.render); // option to below
-    // for (let i = 0; i < keys.length; i++) {
-    // 	if (keys[i] !== 'format' && keys[i] !== 'parentId') {
-    // 		//newNode.setAttributeNS(null, keys[i], obj.render[keys[i]]);
-    // 	}
-    // }
     
     if (obj.render.color) newNode.setAttributeNS(null, 'fill', obj.render.color);
     if (obj.render.stroke) newNode.setAttributeNS(null, 'stroke', obj.render.stroke);
@@ -108,22 +96,19 @@ let renderSvg = (helpCalc) => {
     if (obj.id === 'shipBurst') burstNode = newNode;
   }
 
-  function updateObj(obj, zoom) {
+  function updateObj(obj, zoom, refObjs, refId) {
     const cart = helpCalc.fromPolar({
       r: obj.position.r,
       dec: obj.position.dec
     });
-
-    const trim = getTrim(zoom);
+    const trim = getTrim(zoom, refObjs, refId);
+    let node = document.getElementById(obj.id);
 
     const svgTag = obj.render.format;
-    let node = document.getElementById(obj.id);
     if (svgTag === 'circle') {
-      let rPx = Math.max(2, obj.r / zoom);
-
       node.setAttributeNS(null, 'cx', (viewCenter.x + trim.x + cart.x / zoom));
       node.setAttributeNS(null, 'cy', (viewCenter.y + trim.y - cart.y / zoom));
-      node.setAttributeNS(null, 'r', rPx);
+      node.setAttributeNS(null, 'r', Math.max(2, obj.r / zoom));
     } else if (svgTag === 'rect') {
       const widthPx = Math.max(2, obj.width / zoom);
       const heightPx = Math.max(2, obj.height / zoom);
@@ -133,10 +118,10 @@ let renderSvg = (helpCalc) => {
       node.setAttributeNS(null, 'width', widthPx);
       node.setAttributeNS(null, 'height', heightPx);
     } else if (obj.id === 'ship1') {
-      const x = (viewCenter.x + trim.x + cart.x/zoom - 10);
+      const x = (viewCenter.x + trim.x + cart.x/zoom - 5);
       const y = (viewCenter.y + trim.y - cart.y / zoom - 10);
       const pitch = obj.position.pitchDec;
-      const transform = `translate(${x},${y}) rotate(${pitch})`;
+      const transform = `translate(${x},${y}) rotate(${pitch},5,5)`;
       const visibility = obj.position.burst.a > 0 ?  'visible' : 'hidden';
       node.setAttributeNS(null, 'transform', transform);
       burstNode.setAttributeNS(null, 'visibility', visibility);
@@ -144,8 +129,8 @@ let renderSvg = (helpCalc) => {
   }
 
   function getSvgCanvasNode(canvasNode) {
-
     var canvasSvgNode;
+
     for (let i = 0; i < canvasNode.children.length; i++) {
       if (canvasNode.children[i].id === 'canvasSvg') canvasSvgNode = canvasNode.children[i];
     }
@@ -168,17 +153,32 @@ let renderSvg = (helpCalc) => {
     }
   }
 
-  function getTrim(zoom) {
-
-    var trimY = 6378100;
-    if (zoom <10000 ) trimY = 6378100 + 200 * zoom ;
-    if (zoom > 100000 / 2 ) trimY = 6378100 / 2;
-    if (zoom > 100000 ) trimY = 0;
-
-    let trim = {
-      x: 0 / zoom,
-      y: trimY  / zoom
+  function getTrim(zoom, refObjs, refId) {
+    const refCar = helpCalc.fromPolar({r: refObjs.position.r, dec: refObjs.position.dec})
+    const canvasMinSize = Math.min(canvasNode.offsetWidth, canvasNode.offsetHeight) * zoom
+    const refObjWidth = refObjs.r * 2;
+    
+    let trim;
+    const ratio = refObjWidth/canvasMinSize;
+    const closeMinRatio = refId === 'moon' ? .5 : 5;
+    if (ratio > closeMinRatio) { // close, surface on botton
+      trim = {
+        x: -refCar.x / zoom,
+        y: refCar.y / zoom + refObjs.r / zoom + 200
+      } 
+    } else if (ratio < .5 || refId === 'moon') { // distant, center
+      trim = {x: -refCar.x / zoom, y: refCar.y / zoom}
+    } 
+    else {
+      trim = { // intermediate
+        x: -refCar.x / zoom,
+        y: refCar.y / zoom + refObjs.r / zoom + 20
+      }
+      if (shipDec > 45 && shipDec <= 135) trim = {x: -trim.y, y: -trim.x} // right
+      else if (shipDec > 135 && shipDec <= 225) trim = {x: trim.x, y: -trim.y} // bottom
+      else if (shipDec > 225 && shipDec <= 325) trim = {x: trim.y, y: trim.x}; // left
     }
+
     return trim;
   }
 

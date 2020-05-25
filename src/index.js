@@ -5,25 +5,26 @@ import moon from './moon';
 import iss from './iss';
 import ship1 from './ship';
 
-import helpCalc from './helpCalc';
+import getHelpCalc from './helpCalc';
 
 document.onLoad = loadApp;
 
 var app = function(deps){
 
   var objs = deps.objs;
-  var canvas = getCanvas();
+  var helpCalc = deps.getHelpCalc()
   var moveSvg = deps.moveSvg(helpCalc);
-  var renderSvg = deps.renderSvg(deps.helpCalc)
-  var panel = getPanel(objs.earth);
-  var ship1 = deps.ship1();
+  var renderSvg = deps.renderSvg(helpCalc);
+  var ship1Data = deps.ship1(helpCalc);
+  var canvas = getCanvas();
+  var panel = getPanel(helpCalc);
+
+  var ship1 = ship1Data.objList[0];
 
   moveSvg.init(objs);
 
-  var canvasNode = document.getElementById('canvas'); // leave until ship is svg
-
-  renderSvg.create(objs, canvas.state.zoom);
-  renderSvg.createOne(ship1, canvas.state.zoom);
+  renderSvg.create(objs, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
+  renderSvg.createOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs)), canvas.state.ref;
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
@@ -36,22 +37,22 @@ var app = function(deps){
       canvas.state.time += (canvas.state.secondSkip * canvas.state.timeSpeed);
 
       moveSvg.move(canvas.state.secondSkip, canvas.state.timeSpeed);
-      renderSvg.update(objs, canvas.state.zoom);
+      renderSvg.update(objs, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
 
-      ship1.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
-      moveSvg.moveOne(ship1.objList[0], canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
-      renderSvg.updateOne(ship1, canvas.state.zoom);
+      ship1Data.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
+      moveSvg.moveOne(ship1, canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
+      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
       panel.update();
 
-      if (ship1.objList[0].position.crash) {
-        alert('ship crashed');
+      if (ship1.position.crash) {
+        modalOpen('ship crashed. Reload game.')
         return;
       }
       
       if (!checkTimeOut()) loop();
     }, 1000 * canvas.state.secondSkip);
   }
-  
+
   function checkTimeOut() {
     var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
     var d = new Date(0, 0, 0, 0, 0, 0, 0);
@@ -59,7 +60,7 @@ var app = function(deps){
     var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
     
     if (days > 365) {
-      alert('Exausted fuel after 1 year of flight. Reload game.');
+      modalOpen('Exausted fuel after 1 year of flight. Reload game.');
       return true;
     }
     return false;
@@ -80,6 +81,7 @@ var app = function(deps){
         else if (action === 'zoomPlus') canvas.zoomMultiply(.5);
         else if (action === 'timePlus') canvas.timeMultiply(2);
         else if (action === 'timeMinus') canvas.timeMultiply(.5);
+        else if (action === 'modalClose') modalClose();
       }
     }
   }
@@ -87,21 +89,22 @@ var app = function(deps){
   function verifyKey(e) {
     var keyCode = e.code;
     if (keyCode === 'KeyP') canvas.playStop();
-    else if (keyCode === 'ArrowUp') ship1.addPitch(10);
-    else if (keyCode === 'ArrowDown') ship1.addPitch(-10);
-    else if (keyCode === 'KeyA') ship1.addBurstTNext(1);
-    else if (keyCode === 'KeyZ') ship1.addBurstTNext(-1);
+    else if (keyCode === 'ArrowUp') ship1Data.addPitch(10);
+    else if (keyCode === 'ArrowDown') ship1Data.addPitch(-10);
+    else if (keyCode === 'KeyA') ship1Data.addBurstTNext(1);
+    else if (keyCode === 'KeyZ') ship1Data.addBurstTNext(-1);
     else if (keyCode === 'Minus') canvas.zoomMultiply(2);
     else if (keyCode === 'Equal') canvas.zoomMultiply(.5);
     else if (keyCode === 'Period') canvas.timeMultiply(2);
     else if (keyCode === 'Comma') canvas.timeMultiply(.5);
+    else if (keyCode === 'KeyV') canvas.setRef();
     else if (keyCode.substring(0,5) === 'Digit') {
-      ship1.setBurstANext(keyCode.replace('Digit', ''))
+      ship1Data.setBurstANext(keyCode.replace('Digit', ''))
     }
     if (!canvas.state.play) return;
 
     if (keyCode === 'Space') {
-      ship1.burstStart();
+      ship1Data.burstStart();
     }
   }
 
@@ -116,12 +119,14 @@ var app = function(deps){
       time: 0, // time passed (s)
       timeSpeed: 1,
       secondSkip: 0.1, // each time loop timming (s)
+      ref: 'earth'
     }
 
     var zoomMultiply = function(times) {
       state.zoom *= times;
       state.zoom = Math.max(state.zoom, 1);
-      renderSvg.update(deps.objs, state.zoom)
+      renderSvg.update(objs, state.zoom, canvas.getRefObj(objs), canvas.state.ref);
+      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
     }
 
     var timeMultiply = function(times) {
@@ -139,34 +144,50 @@ var app = function(deps){
       if (canvas.state.play) loop();
     }
 
+    var setRef = function() {
+      if (state.ref === 'earth') state.ref = 'moon';
+      else state.ref = 'earth';
+    }
+
+    var getRefObj = function(objs) {
+      var obj = 'hey';
+      if (state.ref === 'earth') obj = objs.earth.objList[2];
+      else obj = objs.moon.objList[0];
+      return obj;
+    }
+
     return {
       playStop,
       state,
       timeMultiply,
-      zoomMultiply
+      zoomMultiply,
+      setRef,
+      getRefObj
     }
   }
 
-  function getPanel(earth) {
+  function getPanel(helpCalc) {
 
     var position = {};
+    var panel = {}
 
     var content = { // xxx
       alt: function() {
+        var alt = canvas.state.ref === 'earth' ? panel.altEarth : panel.altMoon;
         var unit = 'm';
-        var alt = position.r - earth.r;
         if (alt > 1000) {
           alt /=  1000
           unit = 'km';
-
         }
         return Math.round(alt).toLocaleString('en-US') + unit;
       },
       long: function() {
-        return convLong(position.dec);
+        var long = canvas.state.ref === 'earth' ? panel.headEarth : panel.headMoon;
+        return convLong((180  - long) % 360);
       },
       pitch: function() {
-        return convDeg(toDeg180(90 - position.pitchDec));
+        var pitch = helpCalc.toDeg360(position.pitchDec - position.dec)
+        return formatDeg(helpCalc.toDeg180(90 - pitch ))
       },
       climb: function() {
         var vDec = position.vDec + position.dec;
@@ -178,12 +199,15 @@ var app = function(deps){
         var v = position.vR * Math.sin(vDec * (Math.PI/180))
         return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
       },
+      gLocal: function() {
+        return (canvas.state.ref === 'earth' ? panel.gEarth : panel.gMoon).toFixed(2) + 'm/s2';
+      },
       speed: function() {
         return Math.round(position.vR * 3.6).toLocaleString('en-US') + 'km/h';
       },
       burstA: function() {
-        var a = (position.burst.a / earth.g).toFixed(0);
-        var aNext = (position.burst.aNext / earth.g).toFixed(0);
+        var a = (position.burst.a / 9.8).toFixed(0);
+        var aNext = (position.burst.aNext / 9.8).toFixed(0);
         return a + 'g (' + aNext + 'g)';
       },
       burstT: function() {
@@ -201,7 +225,7 @@ var app = function(deps){
         return days + 'd ' + d.toLocaleTimeString('en-US', { hour12: false });
       },
       head: function() {
-        return convDeg(position.vDec);
+        return formatDeg(position.vDec);
       },
       zoom: function() {
         var zoom  = canvas.state.zoom
@@ -212,6 +236,9 @@ var app = function(deps){
       },
       timePlay: function() {
         return canvas.state.play ? 'Pause' : 'Play';
+      },
+      ref: function() {
+        return canvas.state.ref;
       }
     }
 
@@ -219,15 +246,16 @@ var app = function(deps){
       if (key) {
         document.getElementById(key).innerText = content[key]();
       } else {
-        position = ship1.objList[0].position;
+        position = ship1.position;
+        panel = ship1.panel;
         var keys = Object.keys(content);
-        keys.forEach(element => {
+        keys.forEach(function(element) {
           document.getElementById(element).innerText = content[element]();
         });
       }
     }
 
-    function convDeg(deg) {
+    function formatDeg(deg) {
       var txt = Math.round(deg) + String.fromCharCode(176);
       return txt;
     }
@@ -251,17 +279,24 @@ var app = function(deps){
       return txt;
     }
 
-    function toDeg180(deg) {
-      var ret = deg % 360;
-      if (ret > 180) ret = ret - 360;
-      return ret;
-    }
-
     return {
       update
     }
   }
 
+  function modalClose() {
+    var classList = document.getElementById('modal').classList;
+    classList.remove('modalOpen');
+    classList.add('modalClosed');
+    document.getElementById('modalcontent').innerText = '';
+  }
+
+  function modalOpen(msg) {
+    var classList = document.getElementById('modal').classList;
+    classList.remove('modalClosed')
+    classList.add('modalOpen');
+    document.getElementById('modalcontent').innerText = msg
+  }
 }
 
 var loadApp = (function() {
@@ -275,7 +310,7 @@ var loadApp = (function() {
       moon: moon,
       iss: iss,
     },
-    helpCalc: helpCalc
+    getHelpCalc: getHelpCalc
   }
 
   app(deps);
