@@ -51,15 +51,6 @@ let renderSvg = (helpCalc) => {
     });
   }
 
-  let updateOne = (objList, zoom) => {
-    // called at init and loop
-
-    if (!viewCenter) viewCenter = getViewCenter(canvasNode);
-    objList.forEach(obj => {
-      updateObj(obj, zoom, viewCenter);
-    })
-  }
-
   function createObj(canvasNode, obj) {
 
     let parentNode;

@@ -23,8 +23,8 @@ var app = function(deps){
 
   moveSvg.init(objs);
 
-  renderSvg.create(objs, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
-  renderSvg.createOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs)), canvas.state.ref;
+  renderSvg.create(objs, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
+  renderSvg.createOne(ship1Data, canvas.state.zoom, getRefObj(objs)), canvas.state.ref;
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
@@ -37,11 +37,11 @@ var app = function(deps){
       canvas.state.time += (canvas.state.secondSkip * canvas.state.timeSpeed);
 
       moveSvg.move(canvas.state.secondSkip, canvas.state.timeSpeed);
-      renderSvg.update(objs, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
+      renderSvg.update(objs, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
 
       ship1Data.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
       moveSvg.moveOne(ship1, canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
-      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
+      renderSvg.updateOne(ship1Data, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
       panel.update();
 
       if (ship1.position.crash) {
@@ -76,11 +76,11 @@ var app = function(deps){
       if (!['file:','http:'].includes(action.substring(0,5))) {
         e.preventDefault();
 
-        if (action === 'timePlay') canvas.playStop();
-        else if (action === 'zoomMinus') canvas.zoomMultiply(2);
-        else if (action === 'zoomPlus') canvas.zoomMultiply(.5);
-        else if (action === 'timePlus') canvas.timeMultiply(2);
-        else if (action === 'timeMinus') canvas.timeMultiply(.5);
+        if (action === 'timePlay') playStop();
+        else if (action === 'zoomMinus') zoomMultiply(2);
+        else if (action === 'zoomPlus') zoomMultiply(.5);
+        else if (action === 'timePlus') timeMultiply(2);
+        else if (action === 'timeMinus') timeMultiply(.5);
         else if (action === 'modalClose') modalClose();
       }
     }
@@ -88,16 +88,16 @@ var app = function(deps){
 
   function verifyKey(e) {
     var keyCode = e.code;
-    if (keyCode === 'KeyP') canvas.playStop();
+    if (keyCode === 'KeyP') playStop();
     else if (keyCode === 'ArrowUp') ship1Data.addPitch(10);
     else if (keyCode === 'ArrowDown') ship1Data.addPitch(-10);
     else if (keyCode === 'KeyA') ship1Data.addBurstTNext(1);
     else if (keyCode === 'KeyZ') ship1Data.addBurstTNext(-1);
-    else if (keyCode === 'Minus') canvas.zoomMultiply(2);
-    else if (keyCode === 'Equal') canvas.zoomMultiply(.5);
-    else if (keyCode === 'Period') canvas.timeMultiply(2);
-    else if (keyCode === 'Comma') canvas.timeMultiply(.5);
-    else if (keyCode === 'KeyV') canvas.setRef();
+    else if (keyCode === 'Minus') zoomMultiply(2);
+    else if (keyCode === 'Equal') zoomMultiply(.5);
+    else if (keyCode === 'Period') timeMultiply(2);
+    else if (keyCode === 'Comma') timeMultiply(.5);
+    else if (keyCode === 'KeyV') setRef();
     else if (keyCode.substring(0,5) === 'Digit') {
       ship1Data.setBurstANext(keyCode.replace('Digit', ''))
     }
@@ -121,49 +121,43 @@ var app = function(deps){
       secondSkip: 0.1, // each time loop timming (s)
       ref: 'earth'
     }
-
-    var zoomMultiply = function(times) {
-      state.zoom *= times;
-      state.zoom = Math.max(state.zoom, 1);
-      renderSvg.update(objs, state.zoom, canvas.getRefObj(objs), canvas.state.ref);
-      renderSvg.updateOne(ship1Data, canvas.state.zoom, canvas.getRefObj(objs), canvas.state.ref);
-    }
-
-    var timeMultiply = function(times) {
-      var timeSpeed = canvas.state.timeSpeed * times;
-      if (timeSpeed < 1) timeSpeed = 1;
-      if (timeSpeed > 1000000) timeSpeed = 1000000;
-      canvas.state.timeSpeed = parseInt(timeSpeed);
-      panel.update('timeSpeed');
-    }
-
-    var playStop = function() {
-      canvas.state.play = !canvas.state.play;
-      document.getElementById('time').style.color = canvas.state.play ? 'white' : 'red';
-      panel.update('timePlay');
-      if (canvas.state.play) loop();
-    }
-
-    var setRef = function() {
-      if (state.ref === 'earth') state.ref = 'moon';
-      else state.ref = 'earth';
-    }
-
-    var getRefObj = function(objs) {
-      var obj = 'hey';
-      if (state.ref === 'earth') obj = objs.earth.objList[2];
-      else obj = objs.moon.objList[0];
-      return obj;
-    }
-
     return {
-      playStop,
       state,
-      timeMultiply,
-      zoomMultiply,
-      setRef,
-      getRefObj
     }
+  }
+
+  function getRefObj(objs) {
+    var obj = 'hey';
+    if (canvas.state.ref === 'earth') obj = objs.earth.objList[2];
+    else obj = objs.moon.objList[0];
+    return obj;
+  }
+
+  function setRef() {
+    if (canvas.state.ref === 'earth') canvas.state.ref = 'moon';
+    else canvas.state.ref = 'earth';
+  }
+
+  function playStop() {
+    canvas.state.play = !canvas.state.play;
+    document.getElementById('time').style.color = canvas.state.play ? 'white' : 'red';
+    panel.update('timePlay');
+    if (canvas.state.play) loop();
+  }
+
+  function zoomMultiply(times) {
+    canvas.state.zoom *= times;
+    canvas.state.zoom = Math.max(canvas.state.zoom, 1);
+    renderSvg.update(objs, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
+    renderSvg.updateOne(ship1Data, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
+  }
+
+  function timeMultiply(times) {
+    var timeSpeed = canvas.state.timeSpeed * times;
+    if (timeSpeed < 1) timeSpeed = 1;
+    if (timeSpeed > 1000000) timeSpeed = 1000000;
+    canvas.state.timeSpeed = parseInt(timeSpeed);
+    panel.update('timeSpeed');
   }
 
   function getPanel(helpCalc) {
