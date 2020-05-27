@@ -32,7 +32,7 @@ var earth = {
 			renderType: 'svg',
       r: 6378100, // m
       mass: 5.98e24, // kg
-			g: 9.80665, // m/s2
+			//g: 9.80665, // m/s2
 			position: {
 				r: 0, // distance from center (m)
 				dec: 0 // declination (deg), could be any value because r = 0

@@ -4,6 +4,6 @@ test('is an object', () => {
 	expect(objs).toMatchObject(expect.anything())
 });
 
-test('has an id "earth"', () => {
-  expect(objs.default.id).toBe('earth');
+test('has an mainId "earth"', () => {
+  expect(objs.default.mainId).toBe('earth');
 });

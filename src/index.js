@@ -11,20 +11,29 @@ document.onLoad = loadApp;
 
 var app = function(deps){
 
+  var state1 = {
+    timeSpeed: 1, // new
+    width: 2000, // (m)
+    time: 0, // time passed (s)
+    zoom: 1,
+    play: true,
+    secondSkip: 0.1, // each time loop timming (s)
+    ref: 'earth'
+  }
+
   var objs = deps.objs;
   var helpCalc = deps.getHelpCalc()
   var moveSvg = deps.moveSvg(helpCalc);
   var renderSvg = deps.renderSvg(helpCalc);
   var ship1Data = deps.ship1(helpCalc);
-  var canvas = getCanvas();
   var panel = getPanel(helpCalc);
 
   var ship1 = ship1Data.objList[0];
 
   moveSvg.init(objs);
 
-  renderSvg.create(objs, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
-  renderSvg.createOne(ship1Data, canvas.state.zoom, getRefObj(objs)), canvas.state.ref;
+  renderSvg.create(objs, state1.zoom, getRefObj(objs), state1.ref);
+  renderSvg.createOne(ship1Data, state1.zoom, getRefObj(objs)), state1.ref;
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
@@ -33,15 +42,15 @@ var app = function(deps){
 
   function loop() {
     setTimeout(function() {
-      if (!canvas.state.play) return;
-      canvas.state.time += (canvas.state.secondSkip * canvas.state.timeSpeed);
+      if (!state1.play) return;
+      state1.time += (state1.secondSkip * state1.timeSpeed);
 
-      moveSvg.move(canvas.state.secondSkip, canvas.state.timeSpeed);
-      renderSvg.update(objs, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
+      moveSvg.move(state1.secondSkip, state1.timeSpeed);
+      renderSvg.update(objs, state1.zoom, getRefObj(objs), state1.ref);
 
-      ship1Data.burstUpdate(canvas.state.secondSkip, canvas.state.timeSpeed);
-      moveSvg.moveOne(ship1, canvas.state.secondSkip, canvas.state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
-      renderSvg.updateOne(ship1Data, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
+      ship1Data.burstUpdate(state1.secondSkip, state1.timeSpeed);
+      moveSvg.moveOne(ship1, state1.secondSkip, state1.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
+      renderSvg.updateOne(ship1Data, state1.zoom, getRefObj(objs), state1.ref);
       panel.update();
 
       if (ship1.position.crash) {
@@ -50,13 +59,13 @@ var app = function(deps){
       }
       
       if (!checkTimeOut()) loop();
-    }, 1000 * canvas.state.secondSkip);
+    }, 1000 * state1.secondSkip);
   }
 
   function checkTimeOut() {
     var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
     var d = new Date(0, 0, 0, 0, 0, 0, 0);
-    d.setSeconds(canvas.state.time);
+    d.setSeconds(state1.time);
     var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
     
     if (days > 365) {
@@ -101,63 +110,59 @@ var app = function(deps){
     else if (keyCode.substring(0,5) === 'Digit') {
       ship1Data.setBurstANext(keyCode.replace('Digit', ''))
     }
-    if (!canvas.state.play) return;
+    if (!state1.play) return;
 
     if (keyCode === 'Space') {
       ship1Data.burstStart();
     }
   }
 
-  function getCanvas() {
-    var state = {
-      widthIni: 2000,
-      width: 2000, // (m)
-      heightPx: 0,
-      widthPx: 0,
-      zoom: 1,
-      play: true,
-      time: 0, // time passed (s)
-      timeSpeed: 1,
-      secondSkip: 0.1, // each time loop timming (s)
-      ref: 'earth'
-    }
-    return {
-      state,
-    }
-  }
-
   function getRefObj(objs) {
     var obj = 'hey';
-    if (canvas.state.ref === 'earth') obj = objs.earth.objList[2];
+    if (state1.ref === 'earth') obj = objs.earth.objList[2];
     else obj = objs.moon.objList[0];
     return obj;
   }
 
   function setRef() {
-    if (canvas.state.ref === 'earth') canvas.state.ref = 'moon';
-    else canvas.state.ref = 'earth';
+    if (state1.ref === 'earth') state1.ref = 'moon';
+    else state1.ref = 'earth';
   }
 
   function playStop() {
-    canvas.state.play = !canvas.state.play;
-    document.getElementById('time').style.color = canvas.state.play ? 'white' : 'red';
+    state1.play = !state1.play;
+    document.getElementById('time').style.color = state1.play ? 'white' : 'red';
     panel.update('timePlay');
-    if (canvas.state.play) loop();
+    if (state1.play) loop();
   }
 
   function zoomMultiply(times) {
-    canvas.state.zoom *= times;
-    canvas.state.zoom = Math.max(canvas.state.zoom, 1);
-    renderSvg.update(objs, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
-    renderSvg.updateOne(ship1Data, canvas.state.zoom, getRefObj(objs), canvas.state.ref);
+    state1.zoom *= times;
+    state1.zoom = Math.max(state1.zoom, 1);
+    renderSvg.update(objs, state1.zoom, getRefObj(objs), state1.ref);
+    renderSvg.updateOne(ship1Data, state1.zoom, getRefObj(objs), state1.ref);
   }
 
   function timeMultiply(times) {
-    var timeSpeed = canvas.state.timeSpeed * times;
+    var timeSpeed = state1.timeSpeed * times;
     if (timeSpeed < 1) timeSpeed = 1;
     if (timeSpeed > 1000000) timeSpeed = 1000000;
-    canvas.state.timeSpeed = parseInt(timeSpeed);
+    state1.timeSpeed = parseInt(timeSpeed);
     panel.update('timeSpeed');
+  }
+
+  function modalClose() {
+    var classList = document.getElementById('modal').classList;
+    classList.remove('modalOpen');
+    classList.add('modalClosed');
+    document.getElementById('modalcontent').innerText = '';
+  }
+
+  function modalOpen(msg) {
+    var classList = document.getElementById('modal').classList;
+    classList.remove('modalClosed')
+    classList.add('modalOpen');
+    document.getElementById('modalcontent').innerText = msg
   }
 
   function getPanel(helpCalc) {
@@ -167,7 +172,7 @@ var app = function(deps){
 
     var content = { // xxx
       alt: function() {
-        var alt = canvas.state.ref === 'earth' ? panel.altEarth : panel.altMoon;
+        var alt = state1.ref === 'earth' ? panel.altEarth : panel.altMoon;
         var unit = 'm';
         if (alt > 1000) {
           alt /=  1000
@@ -176,7 +181,7 @@ var app = function(deps){
         return Math.round(alt).toLocaleString('en-US') + unit;
       },
       long: function() {
-        var long = canvas.state.ref === 'earth' ? panel.headEarth : panel.headMoon;
+        var long = state1.ref === 'earth' ? panel.headEarth : panel.headMoon;
         return convLong((180  - long) % 360);
       },
       pitch: function() {
@@ -194,7 +199,7 @@ var app = function(deps){
         return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
       },
       gLocal: function() {
-        return (canvas.state.ref === 'earth' ? panel.gEarth : panel.gMoon).toFixed(2) + 'm/s2';
+        return (state1.ref === 'earth' ? panel.gEarth : panel.gMoon).toFixed(2) + 'm/s2';
       },
       speed: function() {
         return Math.round(position.vR * 3.6).toLocaleString('en-US') + 'km/h';
@@ -208,13 +213,13 @@ var app = function(deps){
         return Math.round(position.burst.t) + 's (' + position.burst.tNext.toFixed(0) + 's)';
       },
       scale: function() {
-        var scale = canvas.state.width / 10  * canvas.state.zoom;
+        var scale = state1.width / 10  * state1.zoom;
         return convMkm(scale);g
       },
       time: function() {
         var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
         var d = new Date(0, 0, 0, 0, 0, 0, 0);
-        d.setSeconds(canvas.state.time);
+        d.setSeconds(state1.time);
         var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
         return days + 'd ' + d.toLocaleTimeString('en-US', { hour12: false });
       },
@@ -222,17 +227,17 @@ var app = function(deps){
         return formatDeg(position.vDec);
       },
       zoom: function() {
-        var zoom  = canvas.state.zoom
+        var zoom  = state1.zoom
         return zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k';
       },
       timeSpeed: function() {
-        return convKM(canvas.state.timeSpeed);
+        return convKM(state1.timeSpeed);
       },
       timePlay: function() {
-        return canvas.state.play ? 'Pause' : 'Play';
+        return state1.play ? 'Pause' : 'Play';
       },
       ref: function() {
-        return canvas.state.ref;
+        return state1.ref;
       }
     }
 
@@ -276,20 +281,6 @@ var app = function(deps){
     return {
       update
     }
-  }
-
-  function modalClose() {
-    var classList = document.getElementById('modal').classList;
-    classList.remove('modalOpen');
-    classList.add('modalClosed');
-    document.getElementById('modalcontent').innerText = '';
-  }
-
-  function modalOpen(msg) {
-    var classList = document.getElementById('modal').classList;
-    classList.remove('modalClosed')
-    classList.add('modalOpen');
-    document.getElementById('modalcontent').innerText = msg
   }
 }
 
