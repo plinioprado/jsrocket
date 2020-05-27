@@ -12,15 +12,12 @@ The current version is a working protype. Just read the Help instructions.
 
 Most of the current evolution is being made in better view centers and instruents.
 
-ISS space station and moon are orbiting Earth. But only as references, docking or landing outside the base will require the moving view centers.
+The ship can land on the moon, but not dock in the ISS
 
 Next features:
 
 * Control panel with better instruments.
-* Options to move the view center.
 * 'T' activating a trail of the recent trajectory
-
-Moon and iss code is added, but in the current setup their moving and rendering are too heavy for looping every 0.1s. They will be revisited after Ship is moved to svg.
 
 ## Getting Started
 
