@@ -1,5 +1,6 @@
 import renderSvg from './render-svg';
-import moveSvg from './move-svg';
+import move from './move';
+import getPanel from './panel';
 import earth from './earth';
 import moon from './moon';
 import iss from './iss';
@@ -11,7 +12,7 @@ document.onLoad = loadApp;
 
 var app = function(deps){
 
-  var state1 = {
+  var state = {
     timeSpeed: 1, // new
     width: 2000, // (m)
     time: 0, // time passed (s)
@@ -23,17 +24,15 @@ var app = function(deps){
 
   var objs = deps.objs;
   var helpCalc = deps.getHelpCalc()
-  var moveSvg = deps.moveSvg(helpCalc);
+  var move = deps.move(helpCalc);
   var renderSvg = deps.renderSvg(helpCalc);
   var ship1Data = deps.ship1(helpCalc);
-  var panel = getPanel(helpCalc);
-
   var ship1 = ship1Data.objList[0];
+  var panel = deps.getPanel(helpCalc, state, ship1);
 
-  moveSvg.init(objs);
-
-  renderSvg.create(objs, state1.zoom, getRefObj(objs), state1.ref);
-  renderSvg.createOne(ship1Data, state1.zoom, getRefObj(objs)), state1.ref;
+  move.init(objs);
+  renderSvg.create(objs, state.zoom, getRefObj(objs), state.ref);
+  renderSvg.createOne(ship1Data, state.zoom, getRefObj(objs)), state.ref;
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
@@ -42,15 +41,15 @@ var app = function(deps){
 
   function loop() {
     setTimeout(function() {
-      if (!state1.play) return;
-      state1.time += (state1.secondSkip * state1.timeSpeed);
+      if (!state.play) return;
+      state.time += (state.secondSkip * state.timeSpeed);
 
-      moveSvg.move(state1.secondSkip, state1.timeSpeed);
-      renderSvg.update(objs, state1.zoom, getRefObj(objs), state1.ref);
+      move.move(state.secondSkip, state.timeSpeed);
+      renderSvg.update(objs, state.zoom, getRefObj(objs), state.ref);
 
-      ship1Data.burstUpdate(state1.secondSkip, state1.timeSpeed);
-      moveSvg.moveOne(ship1, state1.secondSkip, state1.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
-      renderSvg.updateOne(ship1Data, state1.zoom, getRefObj(objs), state1.ref);
+      ship1Data.burstUpdate(state.secondSkip, state.timeSpeed);
+      move.moveOne(ship1, state.secondSkip, state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
+      renderSvg.updateOne(ship1Data, state.zoom, getRefObj(objs), state.ref);
       panel.update();
 
       if (ship1.position.crash) {
@@ -59,13 +58,13 @@ var app = function(deps){
       }
       
       if (!checkTimeOut()) loop();
-    }, 1000 * state1.secondSkip);
+    }, 1000 * state.secondSkip);
   }
 
   function checkTimeOut() {
     var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
     var d = new Date(0, 0, 0, 0, 0, 0, 0);
-    d.setSeconds(state1.time);
+    d.setSeconds(state.time);
     var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
     
     if (days > 365) {
@@ -110,7 +109,7 @@ var app = function(deps){
     else if (keyCode.substring(0,5) === 'Digit') {
       ship1Data.setBurstANext(keyCode.replace('Digit', ''))
     }
-    if (!state1.play) return;
+    if (!state.play) return;
 
     if (keyCode === 'Space') {
       ship1Data.burstStart();
@@ -119,35 +118,35 @@ var app = function(deps){
 
   function getRefObj(objs) {
     var obj = 'hey';
-    if (state1.ref === 'earth') obj = objs.earth.objList[2];
+    if (state.ref === 'earth') obj = objs.earth.objList[2];
     else obj = objs.moon.objList[0];
     return obj;
   }
 
   function setRef() {
-    if (state1.ref === 'earth') state1.ref = 'moon';
-    else state1.ref = 'earth';
+    if (state.ref === 'earth') state.ref = 'moon';
+    else state.ref = 'earth';
   }
 
   function playStop() {
-    state1.play = !state1.play;
-    document.getElementById('time').style.color = state1.play ? 'white' : 'red';
+    state.play = !state.play;
+    document.getElementById('time').style.color = state.play ? 'white' : 'red';
     panel.update('timePlay');
-    if (state1.play) loop();
+    if (state.play) loop();
   }
 
   function zoomMultiply(times) {
-    state1.zoom *= times;
-    state1.zoom = Math.max(state1.zoom, 1);
-    renderSvg.update(objs, state1.zoom, getRefObj(objs), state1.ref);
-    renderSvg.updateOne(ship1Data, state1.zoom, getRefObj(objs), state1.ref);
+    state.zoom *= times;
+    state.zoom = Math.max(state.zoom, 1);
+    renderSvg.update(objs, state.zoom, getRefObj(objs), state.ref);
+    renderSvg.updateOne(ship1Data, state.zoom, getRefObj(objs), state.ref);
   }
 
   function timeMultiply(times) {
-    var timeSpeed = state1.timeSpeed * times;
+    var timeSpeed = state.timeSpeed * times;
     if (timeSpeed < 1) timeSpeed = 1;
     if (timeSpeed > 1000000) timeSpeed = 1000000;
-    state1.timeSpeed = parseInt(timeSpeed);
+    state.timeSpeed = parseInt(timeSpeed);
     panel.update('timeSpeed');
   }
 
@@ -164,132 +163,15 @@ var app = function(deps){
     classList.add('modalOpen');
     document.getElementById('modalcontent').innerText = msg
   }
-
-  function getPanel(helpCalc) {
-
-    var position = {};
-    var panel = {}
-
-    var content = { // xxx
-      alt: function() {
-        var alt = state1.ref === 'earth' ? panel.altEarth : panel.altMoon;
-        var unit = 'm';
-        if (alt > 1000) {
-          alt /=  1000
-          unit = 'km';
-        }
-        return Math.round(alt).toLocaleString('en-US') + unit;
-      },
-      long: function() {
-        var long = state1.ref === 'earth' ? panel.headEarth : panel.headMoon;
-        return convLong((180  - long) % 360);
-      },
-      pitch: function() {
-        var pitch = helpCalc.toDeg360(position.pitchDec - position.dec)
-        return formatDeg(helpCalc.toDeg180(90 - pitch ))
-      },
-      climb: function() {
-        var vDec = position.vDec + position.dec;
-        var climb = position.vR * Math.cos(vDec * (Math.PI/180))
-        return Math.round(climb * 3.6).toLocaleString('en-US') + 'km/h';
-      },
-      vOrbit: function() {
-        var vDec = position.vDec + position.dec;
-        var v = position.vR * Math.sin(vDec * (Math.PI/180))
-        return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
-      },
-      gLocal: function() {
-        return (state1.ref === 'earth' ? panel.gEarth : panel.gMoon).toFixed(2) + 'm/s2';
-      },
-      speed: function() {
-        return Math.round(position.vR * 3.6).toLocaleString('en-US') + 'km/h';
-      },
-      burstA: function() {
-        var a = (position.burst.a / 9.8).toFixed(0);
-        var aNext = (position.burst.aNext / 9.8).toFixed(0);
-        return a + 'g (' + aNext + 'g)';
-      },
-      burstT: function() {
-        return Math.round(position.burst.t) + 's (' + position.burst.tNext.toFixed(0) + 's)';
-      },
-      scale: function() {
-        var scale = state1.width / 10  * state1.zoom;
-        return convMkm(scale);g
-      },
-      time: function() {
-        var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
-        var d = new Date(0, 0, 0, 0, 0, 0, 0);
-        d.setSeconds(state1.time);
-        var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
-        return days + 'd ' + d.toLocaleTimeString('en-US', { hour12: false });
-      },
-      head: function() {
-        return formatDeg(position.vDec);
-      },
-      zoom: function() {
-        var zoom  = state1.zoom
-        return zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k';
-      },
-      timeSpeed: function() {
-        return convKM(state1.timeSpeed);
-      },
-      timePlay: function() {
-        return state1.play ? 'Pause' : 'Play';
-      },
-      ref: function() {
-        return state1.ref;
-      }
-    }
-
-    var update = function(key) {
-      if (key) {
-        document.getElementById(key).innerText = content[key]();
-      } else {
-        position = ship1.position;
-        panel = ship1.panel;
-        var keys = Object.keys(content);
-        keys.forEach(function(element) {
-          document.getElementById(element).innerText = content[element]();
-        });
-      }
-    }
-
-    function formatDeg(deg) {
-      var txt = Math.round(deg) + String.fromCharCode(176);
-      return txt;
-    }
-
-    function convLong(deg) {
-      var txt = parseInt(deg) + String.fromCharCode(176);
-      var min = ((deg - parseInt(deg)) * 60).toFixed(2);
-      if (min < 10) txt += '0';
-      txt += min + '\'';
-      return txt;
-    }
-
-    function convMkm(d) {
-      return (d < 1000) ? d + 'm' : d/1000 + 'km';
-    }
-
-    function convKM(d) {
-      var txt = d;
-      if (d >= 1000) txt = parseInt(d/1000) + 'k';
-      else if (d >= 1000000) txt = parseInt(d/1000000) + 'M';
-      return txt;
-    }
-
-    return {
-      update
-    }
-  }
 }
 
 var loadApp = (function() {
 
   var deps = {
     renderSvg: renderSvg,
-    moveSvg: moveSvg,
+    move: move,
     ship1: ship1,
+    getPanel: getPanel,
     objs: {
       earth: earth,
       moon: moon,
