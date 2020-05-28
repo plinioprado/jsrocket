@@ -13,12 +13,14 @@ document.onLoad = loadApp;
 var app = function(deps){
 
   var state = {
-    timeSpeed: 1, // new
     width: 2000, // (m)
-    time: 0, // time passed (s)
     zoom: 1,
     play: true,
-    secondSkip: 0.1, // each time loop timming (s)
+    timerStart: 0,
+    timerSkip: 0,
+    timeSpeed: 1, // * n means n times faster
+    timeSkip: 0.1, // each time loop timming (s)
+    time: 0, // time passed (s)
     ref: 'earth'
   }
 
@@ -37,37 +39,36 @@ var app = function(deps){
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
 
+  state.timerStart = Date.now();
   loop();
 
   function loop() {
     setTimeout(function() {
-      if (!state.play) return;
-      state.time += (state.secondSkip * state.timeSpeed);
+      state.time += (state.timeSkip * state.timeSpeed);
 
-      move.move(state.secondSkip, state.timeSpeed);
+      // game over
+      if (ship1.position.crash) modalOpen('ship crashed. Reload game.');
+      if (ship1.position.crash || !state.play || checkTimeOut()) return;
+
+      // move and render
+      move.move(state.timeSkip, state.timeSpeed);
       renderSvg.update(objs, state.zoom, getRefObj(objs), state.ref);
-
-      ship1Data.burstUpdate(state.secondSkip, state.timeSpeed);
-      move.moveOne(ship1, state.secondSkip, state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
+      ship1Data.burstUpdate(state.timeSkip, state.timeSpeed);
+      move.moveOne(ship1, state.timeSkip, state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
       renderSvg.updateOne(ship1Data, state.zoom, getRefObj(objs), state.ref);
       panel.update();
 
-      if (ship1.position.crash) {
-        modalOpen('ship crashed. Reload game.')
-        return;
-      }
-      
-      if (!checkTimeOut()) loop();
-    }, 1000 * state.secondSkip);
+      // skip for next regular loop
+      var timer = Date.now() - state.timerStart;
+      var timerNext = Math.floor((timer + 1000 * state.timeSkip) / 100) * 100;
+      state.timerSkip = timerNext - timer;
+
+      loop();
+    }, state.timerSkip);
   }
 
   function checkTimeOut() {
-    var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
-    var d = new Date(0, 0, 0, 0, 0, 0, 0);
-    d.setSeconds(state.time);
-    var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
-    
-    if (days > 365) {
+    if ((state.time/(60 * 60 * 24)) > 365) {
       modalOpen('Exausted fuel after 1 year of flight. Reload game.');
       return true;
     }
@@ -145,7 +146,7 @@ var app = function(deps){
   function timeMultiply(times) {
     var timeSpeed = state.timeSpeed * times;
     if (timeSpeed < 1) timeSpeed = 1;
-    if (timeSpeed > 1000000) timeSpeed = 1000000;
+    if (timeSpeed > 2000) timeSpeed = 2000;
     state.timeSpeed = parseInt(timeSpeed);
     panel.update('timeSpeed');
   }
