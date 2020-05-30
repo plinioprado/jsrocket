@@ -13,11 +13,12 @@ document.onLoad = loadApp;
 var app = function(deps){
 
   var state = {
-    width: 2000, // (m)
+    width: 4000, // (m)
     zoom: 1,
     play: true,
     timerStart: 0,
     timerSkip: 0,
+    timer: 0,
     timeSpeed: 1, // * n means n times faster
     timeSkip: 0.1, // each time loop timming (s)
     time: 0, // time passed (s)
@@ -32,6 +33,7 @@ var app = function(deps){
   var ship1 = ship1Data.objList[0];
   var panel = deps.getPanel(helpCalc, state, ship1);
 
+  state.ship1 = ship1Data.state;
   move.init(objs);
   renderSvg.create(objs, state.zoom, getRefObj(objs), state.ref);
   renderSvg.createOne(ship1Data, state.zoom, getRefObj(objs)), state.ref;
@@ -44,6 +46,7 @@ var app = function(deps){
 
   function loop() {
     setTimeout(function() {
+      // starts updating time because tracks how long this loop takes
       state.time += (state.timeSkip * state.timeSpeed);
 
       // game over
@@ -54,14 +57,15 @@ var app = function(deps){
       move.move(state.timeSkip, state.timeSpeed);
       renderSvg.update(objs, state.zoom, getRefObj(objs), state.ref);
       ship1Data.burstUpdate(state.timeSkip, state.timeSpeed);
-      move.moveOne(ship1, state.timeSkip, state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]]);
+      move.moveOne(ship1, state.timeSkip, state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]], state);
       renderSvg.updateOne(ship1Data, state.zoom, getRefObj(objs), state.ref);
+      renderSvg.updateTrail(ship1Data, state.zoom, getRefObj(objs), state.ref, state);
       panel.update();
 
       // skip for next regular loop
-      var timer = Date.now() - state.timerStart;
-      var timerNext = Math.floor((timer + 1000 * state.timeSkip) / 100) * 100;
-      state.timerSkip = timerNext - timer;
+      state.timer = Date.now() - state.timerStart;
+      var timerNext = Math.floor((state.timer + 1000 * state.timeSkip) / 100) * 100;
+      state.timerSkip = timerNext - state.timer;
 
       loop();
     }, state.timerSkip);
@@ -106,6 +110,7 @@ var app = function(deps){
     else if (keyCode === 'Equal') zoomMultiply(.5);
     else if (keyCode === 'Period') timeMultiply(2);
     else if (keyCode === 'Comma') timeMultiply(.5);
+    else if (keyCode === 'KeyT') ship1Data.showTrail(state.ship1);
     else if (keyCode === 'KeyV') setRef();
     else if (keyCode.substring(0,5) === 'Digit') {
       ship1Data.setBurstANext(keyCode.replace('Digit', ''))
@@ -139,8 +144,11 @@ var app = function(deps){
   function zoomMultiply(times) {
     state.zoom *= times;
     state.zoom = Math.max(state.zoom, 1);
-    renderSvg.update(objs, state.zoom, getRefObj(objs), state.ref);
-    renderSvg.updateOne(ship1Data, state.zoom, getRefObj(objs), state.ref);
+    if (!state.play) {
+      renderSvg.update(objs, state.zoom, getRefObj(objs), state.ref);
+      renderSvg.updateOne(ship1Data, state.zoom, getRefObj(objs), state.ref);
+      renderSvg.updateTrail(ship1Data, state.zoom, getRefObj(objs), state.ref, state);
+    }
   }
 
   function timeMultiply(times) {

@@ -26,7 +26,7 @@ let moveSvg = (helpCalc) => {
     }
   }
 
-  const moveOne = (obj, secondSkip, timeSpeed, gObjs) => {
+  const moveOne = (obj, secondSkip, timeSpeed, gObjs, state) => {
 
     var aPolar = {r: obj.position.burst.a, dec: obj.position.pitchDec};
     var vPolar = {r: obj.position.vR, dec: obj.position.vDec};
@@ -38,7 +38,7 @@ let moveSvg = (helpCalc) => {
     var altMoon = obj.panel.altMoon;
     if (altEarth <= 0 || altMoon <= 0) gPolar = {r: 0, dec: 0};
 
-    // Landing
+    // If landing
     if (altEarth < 0 && vPolar.r !== 0) {  
       obj.position.vR = 0;
       obj.position.r = gObjs[0].r;
@@ -53,6 +53,7 @@ let moveSvg = (helpCalc) => {
       return;
     }
 
+    // calc new position
     var aCart = helpCalc.fromPolar(aPolar);
     var gCart = helpCalc.fromPolar(gPolar);
     var vCart = helpCalc.fromPolar(vPolar);
@@ -67,12 +68,16 @@ let moveSvg = (helpCalc) => {
     posPolar = helpCalc.toPolar(posCart);
     posPolar.r = Math.round(posPolar.r);
 
+    // Update new posion
     obj.position.vR = vPolar.r;
     obj.position.vDec = vPolar.dec;
-    obj.position.r = posPolar.r;
+    obj.position.r = Math.round(posPolar.r);
     obj.position.dec = posPolar.dec;
     obj.position.pitchDec = helpCalc.toDeg360(obj.position.pitchDec - posDecOld + obj.position.dec)
     obj.panel.altEarth = Math.round(obj.position.r - gObjs[0].r);
+
+    //update Trail
+    updateTrail(posPolar, state);
   }
 
   function getLocalG(obj, gObjs) {
@@ -104,6 +109,19 @@ let moveSvg = (helpCalc) => {
     const gPol = helpCalc.addPol({r: gR, dec: gDec}, {r: gR2, dec: gDec2});
     
     return gPol
+  }
+
+  function updateTrail(posPolar, state) {
+    var maxLenght = state.ship1.trail.maxLenght;
+    var points = state.ship1.trail.points;
+    if (posPolar.r === points[points.length - 2]
+      && posPolar.dec === points[points.length - 1]) return;
+    points.push(posPolar.r);
+    points.push(posPolar.dec);
+    while (points.length > maxLenght * 2) {
+      points.shift();
+      points.shift();
+    }
   }
 
   return {
