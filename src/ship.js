@@ -1,6 +1,14 @@
 let ship1 = (helpCalc) => {
   const mainId = 'ship1';
 
+  const state = {
+    trail: {
+    maxLenght: 900,
+    points: [],
+    display: true
+    }
+  }
+
   const objList = [
     {
       id: 'ship1',
@@ -77,6 +85,16 @@ let ship1 = (helpCalc) => {
         visibility: 'hidden' // or 'visible'
       }
     },
+    { 
+      id: 'ship1Trail',
+      render: {
+        format: 'polyline',
+        points: '0,0 0,1',
+        color: 'none',
+        stroke: 'white',
+        display: true
+      }
+    },
     {
       render: {
         parentId: 'ship1',
@@ -108,19 +126,25 @@ let ship1 = (helpCalc) => {
     if (gNext <= 9) objList[0].position.burst.aNext = Math.round(gNext * 9.8 * 100)/100;
   }
 
-  var burstStart = function() {
+  var burstStart = () => {
     objList[0].position.burst.a = objList[0].position.burst.aNext;
     objList[0].position.burst.t = objList[0].position.burst.tNext;
   }
 
+  var showTrail = (shipState) => {
+    shipState.trail.display = !shipState.trail.display;
+  }
+
   return {
+    state,
     mainId,
     addBurstTNext,
     addPitch,
     burstStart,
     burstUpdate,
     objList,
-    setBurstANext
+    setBurstANext,
+    showTrail
   }
 }
 
