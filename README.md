@@ -2,9 +2,9 @@
 
 Orbital flight simulator in javascript.
 
-The goal is to evolve the features and code. But keep the application simple enough to allow playing not only with the piloting, but also with the modelling.
+The goal is to evolve the features and code. But keep the application simple enough to allow playing not only with the piloting, but also with the modelling of the phisics involved.
 
-There is a secondary goal to explore fundamentals of javascript, therefore the no use of 3rd party packages in the code itself, and some development tools.
+There is a secondary goal to play with javascript coding, therefore the no use of 3rd party packages in the code itself, and some development tools.
 
 ## Status
 
@@ -12,15 +12,9 @@ The current version is a working protype. Just read the Help instructions.
 
 Most of the current evolution is being made in better view centers and instruents.
 
-ISS space station and moon are orbiting Earth. But only as references, docking or landing outside the base will require the moving view centers.
+The ship can land on the moon, ISS is only a refference and can't be docked in.
 
-Next features:
-
-* Control panel with better instruments.
-* Options to move the view center.
-* 'T' activating a trail of the recent trajectory
-
-Moon and iss code is added, but in the current setup their moving and rendering are too heavy for looping every 0.1s. They will be revisited after Ship is moved to svg.
+Work in progresss is focused in refining the code and improving the control panel.
 
 ## Getting Started
 
@@ -41,11 +35,15 @@ Source maps available on Chrome Sources in webpack/./src
 
 ## Approach
 
-The data is stored in objects injected as dependencies into the app. As is the svg render and probably later other functionalities.
+Model data is stores either in the component object or in a central statr in the main app. Dedevelopment is defining the balance between these options. The data include the positions that are recalculated each loop iteraction cycle of 0.1s.
 
-Rndering is based in svg. With certains point of views according to the zoom.
+View is rendered in sgv code, created at app loading then updated each loop iteraction. The point of view is according to selected reference  (currently or Moon) and zoom (for example Earth in the center or Earth surface in the bottom).
 
-The rendered objectes are created when the app is initiated and updated on zoom change or each loop cycle of 0.1s.
+Controlers are in component objects injected into the main app as dependencies.
+
+The rendered objects are created when the app is initiated and updated on zoom change or each loop cycle of 0.1s.
+
+There is a timer tracking of real game time and a time tracking that is accelerated by a 'Time speed' that can be set between 1 and 2K faster then normal.
 
 The position, speed and acceleration are handled in polar coordinates r (ray in m) and dec (declinaton, or dec, in degrees).
 

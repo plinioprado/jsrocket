@@ -34,9 +34,27 @@ let renderSvg = (helpCalc) => {
     updateObj(obj.objList[0], zoom, refObjs, refId)
   }
 
-  const updateOne = (obj, zoom, refObjs, refId) => {
+  const updateOne = (obj, zoom, refObjs, refId,) => {
     updateObj(obj.objList[0], zoom, refObjs, refId);
     shipDec = obj.objList[0].position.dec;
+  }
+
+  const updateTrail = (obj, zoom, refObjs, refId, state) => {
+    obj.objList[6].render.display = state.ship1.trail.display;
+    const points = state.ship1.trail.points;
+    const trim = getTrim(zoom, refObjs, refId);
+    let newPoints = '';
+    for (let i = 0; i < points.length; i+=2) {
+      const cart = helpCalc.fromPolar({
+        r: points[i], 
+        dec: points[i + 1]
+      });
+      const x = viewCenter.x + trim.x + cart.x / zoom;
+      const y = viewCenter.y + trim.y - cart.y / zoom
+      newPoints += (x + ',' + y + ' ')
+    }
+    obj.objList[6].render.points = newPoints;
+    updateObj(obj.objList[6], zoom, refObjs, refId);
   }
 
   const update = (objs, zoom, refObjs, refId) => {
@@ -51,25 +69,16 @@ let renderSvg = (helpCalc) => {
     });
   }
 
-  let updateOne = (objList, zoom) => {
-    // called at init and loop
-
-    if (!viewCenter) viewCenter = getViewCenter(canvasNode);
-    objList.forEach(obj => {
-      updateObj(obj, zoom, viewCenter);
-    })
-  }
-
   function createObj(canvasNode, obj) {
 
     let parentNode;
     let svgns = 'http://www.w3.org/2000/svg';
     let newNode = document.createElementNS(svgns, obj.render.format);
-    if (obj.id) newNode.setAttributeNS(null, 'id', obj.id);
     
-    if (obj.render.color) newNode.setAttributeNS(null, 'fill', obj.render.color);
-    if (obj.render.stroke) newNode.setAttributeNS(null, 'stroke', obj.render.stroke);
-    if (obj.render.strokeDasharray) newNode.setAttributeNS(null, 'stroke-dasharray', obj.render.strokeDasharray);
+    // Core attibutes
+    if (obj.id) newNode.setAttributeNS(null, 'id', obj.id);
+
+    // Element attibutes
     if (obj.render.stdDeviation) newNode.setAttributeNS(null, 'stdDeviation', obj.render.stdDeviation);
     if (obj.render.clipPath) newNode.setAttributeNS(null, 'clip-path', obj.render.clipPath);
     if (obj.render.filter) newNode.setAttributeNS(null, 'filter', obj.render.filter);
@@ -82,7 +91,14 @@ let renderSvg = (helpCalc) => {
     if (obj.render.cy) newNode.setAttributeNS(null, 'cy', obj.render.cy);
     if (obj.render.rx) newNode.setAttributeNS(null, 'rx', obj.render.rx);
     if (obj.render.ry) newNode.setAttributeNS(null, 'ry', obj.render.ry);
-    // y, y, width and height may be assigned in updateObj(), transform will
+    // y, y, width and height may be updated in updateObj(), transform will
+
+    //Presentation attibutes
+    if (obj.render.display) newNode.setAttributeNS(null, 'display', obj.render.display);
+    if (obj.render.color) newNode.setAttributeNS(null, 'fill', obj.render.color);
+    if (obj.render.stroke) newNode.setAttributeNS(null, 'stroke', obj.render.stroke);
+    if (obj.render.strokeDasharray) newNode.setAttributeNS(null, 'stroke-dasharray', obj.render.strokeDasharray);
+    // display may be updated in updateObj()
 
     if (obj.render.parentId) {
       parentNode = document.getElementById(obj.render.parentId);
@@ -97,13 +113,13 @@ let renderSvg = (helpCalc) => {
   }
 
   function updateObj(obj, zoom, refObjs, refId) {
-    const cart = helpCalc.fromPolar({
-      r: obj.position.r,
-      dec: obj.position.dec
-    });
-    const trim = getTrim(zoom, refObjs, refId);
     let node = document.getElementById(obj.id);
 
+    const cart = helpCalc.fromPolar({
+      r: obj.position ? obj.position.r : null,
+      dec: obj.position ? obj.position.dec : null
+    });
+    const trim = getTrim(zoom, refObjs, refId);
     const svgTag = obj.render.format;
     if (svgTag === 'circle') {
       node.setAttributeNS(null, 'cx', (viewCenter.x + trim.x + cart.x / zoom));
@@ -112,11 +128,13 @@ let renderSvg = (helpCalc) => {
     } else if (svgTag === 'rect') {
       const widthPx = Math.max(2, obj.width / zoom);
       const heightPx = Math.max(2, obj.height / zoom);
-
       node.setAttributeNS(null, 'x', (viewCenter.x + trim.x - cart.x/zoom - (widthPx / 2)));
       node.setAttributeNS(null, 'y', (viewCenter.y + trim.y - cart.y / zoom));
       node.setAttributeNS(null, 'width', widthPx);
       node.setAttributeNS(null, 'height', heightPx);
+    } else if (obj.id === 'ship1Trail') {
+      node.setAttributeNS(null, 'display', obj.render.display ? 'block' : 'none');
+      node.setAttributeNS(null, 'points', obj.render.points);
     } else if (obj.id === 'ship1') {
       const x = (viewCenter.x + trim.x + cart.x/zoom - 5);
       const y = (viewCenter.y + trim.y - cart.y / zoom - 10);
@@ -186,7 +204,8 @@ let renderSvg = (helpCalc) => {
     create,
     createOne,
     update,
-    updateOne
+    updateOne,
+    updateTrail
   }
 }
 
