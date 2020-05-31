@@ -47,7 +47,7 @@ let getPanel = (helpCalc, state1, ship1) => {
       return Math.round(position.burst.t) + 's (' + position.burst.tNext.toFixed(0) + 's)';
     },
     scale: function() {
-      var scale = state1.width / 10  * state1.zoom;
+      var scale = state1.width / 10  * state1.render.zoom;
       return convMkm(scale);g
     },
     time: function() {
@@ -61,7 +61,7 @@ let getPanel = (helpCalc, state1, ship1) => {
       return formatDeg(position.vDec);
     },
     zoom: function() {
-      var zoom  = state1.zoom
+      var zoom  = state1.render.zoom
       return zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k';
     },
     timeSpeed: function() {
