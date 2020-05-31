@@ -6,7 +6,7 @@ let getPanel = (helpCalc, state1, ship1) => {
 
   var content = {
     alt: function() {
-      var alt = state1.ref === 'earth' ? panel.altEarth : panel.altMoon;
+      var alt = state1.render.refId === 'earth' ? panel.altEarth : panel.altMoon;
       var unit = 'm';
       if (alt > 1000) {
         alt /=  1000
@@ -15,7 +15,7 @@ let getPanel = (helpCalc, state1, ship1) => {
       return Math.round(alt).toLocaleString('en-US') + unit;
     },
     long: function() {
-      var long = state1.ref === 'earth' ? panel.headEarth : panel.headMoon;
+      var long = state1.render.refId === 'earth' ? panel.headEarth : panel.headMoon;
       return convLong((180  - long) % 360);
     },
     pitch: function() {
@@ -33,7 +33,7 @@ let getPanel = (helpCalc, state1, ship1) => {
       return Math.round(v * 3.6).toLocaleString('en-US') + 'km/h';
     },
     gLocal: function() {
-      return (state1.ref === 'earth' ? panel.gEarth : panel.gMoon).toFixed(2) + 'm/s2';
+      return (state1.render.refId === 'earth' ? panel.gEarth : panel.gMoon).toFixed(2) + 'm/s2';
     },
     speed: function() {
       return Math.round(position.vR * 3.6).toLocaleString('en-US') + 'km/h';
@@ -71,7 +71,7 @@ let getPanel = (helpCalc, state1, ship1) => {
       return state1.play ? 'Pause' : 'Play';
     },
     ref: function() {
-      return state1.ref;
+      return state1.render.refId;
     }
   }
 

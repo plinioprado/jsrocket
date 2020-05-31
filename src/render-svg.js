@@ -6,14 +6,17 @@ let renderSvg = (helpCalc) => {
   let burstNode;
   let shipDec;
 
-  init()
-
-  function init() {
+  let init = (initState) => {
+    initState.render = {
+      refId: 'earth',
+      refObjs: {},
+      zoom: 1
+    }
     canvasNode = document.getElementById('canvas');
     viewCenter = getViewCenter(canvasNode);
   }
 
-  let create = (objs, zoom, refObjs, refId) => {
+  let create = (objs, refObjs, stateRender) => {
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
@@ -23,50 +26,54 @@ let renderSvg = (helpCalc) => {
         })
       }
     });
-    update(objs, zoom, refObjs, refId);
+    update(objs, refObjs, stateRender);
   }
 
-  const createOne = (obj, zoom, refObjs, refId) => {
+  const createOne = (obj, refObjs, stateRender) => {
     obj.objList.forEach(obj => {
       createObj(canvasNode, obj);
     })
     
-    updateObj(obj.objList[0], zoom, refObjs, refId)
+    updateObj(obj.objList[0], stateRender.zoom, refObjs, stateRender.refId)
   }
 
-  const updateOne = (obj, zoom, refObjs, refId,) => {
-    updateObj(obj.objList[0], zoom, refObjs, refId);
+  const updateOne = (obj, refObjs, stateRender) => {
+    updateObj(obj.objList[0], stateRender.zoom, refObjs, stateRender.refId);
     shipDec = obj.objList[0].position.dec;
   }
 
-  const updateTrail = (obj, zoom, refObjs, refId, state) => {
-    obj.objList[6].render.display = state.ship1.trail.display;
-    const points = state.ship1.trail.points;
-    const trim = getTrim(zoom, refObjs, refId);
+  const updateTrail = (obj, refObjs, stateRender, ship1) => {
+    obj.objList[6].render.display = ship1.trail.display;
+    const points = ship1.trail.points;
+    const trim = getTrim(stateRender.zoom, refObjs, stateRender.refId);
     let newPoints = '';
     for (let i = 0; i < points.length; i+=2) {
       const cart = helpCalc.fromPolar({
         r: points[i], 
         dec: points[i + 1]
       });
-      const x = viewCenter.x + trim.x + cart.x / zoom;
-      const y = viewCenter.y + trim.y - cart.y / zoom
+      const x = viewCenter.x + trim.x + cart.x / stateRender.zoom;
+      const y = viewCenter.y + trim.y - cart.y / stateRender.zoom
       newPoints += (x + ',' + y + ' ')
     }
     obj.objList[6].render.points = newPoints;
-    updateObj(obj.objList[6], zoom, refObjs, refId);
+    updateObj(obj.objList[6], stateRender.zoom, refObjs, stateRender.refId);
   }
 
-  const update = (objs, zoom, refObjs, refId) => {
+  const update = (objs, refObjs, stateRender) => {
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
 
-      if (obj.renderType === 'svg') updateObj(obj, zoom, refObjs, refId);
+      if (obj.renderType === 'svg') updateObj(obj, stateRender.zoom, refObjs, stateRender.refId);
       obj.objList.forEach(obj => {
-        updateObj(obj, zoom, refObjs, refId);
+        updateObj(obj, stateRender.zoom, refObjs, stateRender.refId);
       })
     });
+  }
+
+  const setRef = (ref) => {
+    return ref === 'earth' ? 'moon' : 'earth';
   }
 
   function createObj(canvasNode, obj) {
@@ -112,14 +119,14 @@ let renderSvg = (helpCalc) => {
     if (obj.id === 'shipBurst') burstNode = newNode;
   }
 
-  function updateObj(obj, zoom, refObjs, refId) {
+  function updateObj(obj, zoom, refObjs, stateRender) {
     let node = document.getElementById(obj.id);
 
     const cart = helpCalc.fromPolar({
       r: obj.position ? obj.position.r : null,
       dec: obj.position ? obj.position.dec : null
     });
-    const trim = getTrim(zoom, refObjs, refId);
+    const trim = getTrim(zoom, refObjs, stateRender.refId);
     const svgTag = obj.render.format;
     if (svgTag === 'circle') {
       node.setAttributeNS(null, 'cx', (viewCenter.x + trim.x + cart.x / zoom));
@@ -178,13 +185,13 @@ let renderSvg = (helpCalc) => {
     
     let trim;
     const ratio = refObjWidth/canvasMinSize;
-    const closeMinRatio = refId === 'moon' ? .5 : 5;
+    const closeMinRatio = refId === 'moon' ? 1 : 5;
     if (ratio > closeMinRatio) { // close, surface on botton
       trim = {
         x: -refCar.x / zoom,
         y: refCar.y / zoom + refObjs.r / zoom + 200
       } 
-    } else if (ratio < .5 || refId === 'moon') { // distant, center
+    } else if (ratio < 1 || refId === 'moon') { // distant, center
       trim = {x: -refCar.x / zoom, y: refCar.y / zoom}
     } 
     else {
@@ -203,6 +210,8 @@ let renderSvg = (helpCalc) => {
   return {
     create,
     createOne,
+    init,
+    setRef,
     update,
     updateOne,
     updateTrail

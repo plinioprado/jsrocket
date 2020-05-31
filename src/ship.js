@@ -1,11 +1,13 @@
-let ship1 = (helpCalc) => {
+const ship1 = (helpCalc) => {
   const mainId = 'ship1';
 
-  const state = {
-    trail: {
-    maxLenght: 900,
-    points: [],
-    display: true
+  const init = (initState) => {
+    initState.ship1 = {
+      trail: {
+        maxLenght: 900,
+        points: [],
+        display: true
+        }
     }
   }
 
@@ -136,7 +138,7 @@ let ship1 = (helpCalc) => {
   }
 
   return {
-    state,
+    init,
     mainId,
     addBurstTNext,
     addPitch,

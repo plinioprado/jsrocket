@@ -14,7 +14,6 @@ var app = function(deps){
 
   var state = {
     width: 4000, // (m)
-    zoom: 1,
     play: true,
     timerStart: 0,
     timerSkip: 0,
@@ -22,21 +21,24 @@ var app = function(deps){
     timeSpeed: 1, // * n means n times faster
     timeSkip: 0.1, // each time loop timming (s)
     time: 0, // time passed (s)
-    ref: 'earth'
+    ship1: null,
+    render: null
   }
 
   var objs = deps.objs;
   var helpCalc = deps.getHelpCalc()
   var move = deps.move(helpCalc);
-  var renderSvg = deps.renderSvg(helpCalc);
+  var render = deps.render(helpCalc);
   var ship1Data = deps.ship1(helpCalc);
   var ship1 = ship1Data.objList[0];
   var panel = deps.getPanel(helpCalc, state, ship1);
 
-  state.ship1 = ship1Data.state;
+  render.init(state)
+  ship1Data.init(state)
   move.init(objs);
-  renderSvg.create(objs, state.zoom, getRefObj(objs), state.ref);
-  renderSvg.createOne(ship1Data, state.zoom, getRefObj(objs)), state.ref;
+
+  render.create(objs, getRefObj(objs), state.render);
+  render.createOne(ship1Data, getRefObj(objs), state.render);
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
@@ -55,11 +57,9 @@ var app = function(deps){
 
       // move and render
       move.move(state.timeSkip, state.timeSpeed);
-      renderSvg.update(objs, state.zoom, getRefObj(objs), state.ref);
       ship1Data.burstUpdate(state.timeSkip, state.timeSpeed);
       move.moveOne(ship1, state.timeSkip, state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]], state);
-      renderSvg.updateOne(ship1Data, state.zoom, getRefObj(objs), state.ref);
-      renderSvg.updateTrail(ship1Data, state.zoom, getRefObj(objs), state.ref, state);
+      renderUpdate();
       panel.update();
 
       // skip for next regular loop
@@ -69,6 +69,12 @@ var app = function(deps){
 
       loop();
     }, state.timerSkip);
+  }
+
+  function renderUpdate() {
+    render.update(objs, getRefObj(objs), state.render);
+    render.updateOne(ship1Data, getRefObj(objs), state.render);
+    render.updateTrail(ship1Data, getRefObj(objs), state.render, state.ship1);
   }
 
   function checkTimeOut() {
@@ -111,7 +117,7 @@ var app = function(deps){
     else if (keyCode === 'Period') timeMultiply(2);
     else if (keyCode === 'Comma') timeMultiply(.5);
     else if (keyCode === 'KeyT') ship1Data.showTrail(state.ship1);
-    else if (keyCode === 'KeyV') setRef();
+    else if (keyCode === 'KeyV') state.render.refId = render.setRef(state.render.refId);
     else if (keyCode.substring(0,5) === 'Digit') {
       ship1Data.setBurstANext(keyCode.replace('Digit', ''))
     }
@@ -124,14 +130,9 @@ var app = function(deps){
 
   function getRefObj(objs) {
     var obj = 'hey';
-    if (state.ref === 'earth') obj = objs.earth.objList[2];
+    if (state.render.refId === 'earth') obj = objs.earth.objList[2];
     else obj = objs.moon.objList[0];
     return obj;
-  }
-
-  function setRef() {
-    if (state.ref === 'earth') state.ref = 'moon';
-    else state.ref = 'earth';
   }
 
   function playStop() {
@@ -142,13 +143,9 @@ var app = function(deps){
   }
 
   function zoomMultiply(times) {
-    state.zoom *= times;
-    state.zoom = Math.max(state.zoom, 1);
-    if (!state.play) {
-      renderSvg.update(objs, state.zoom, getRefObj(objs), state.ref);
-      renderSvg.updateOne(ship1Data, state.zoom, getRefObj(objs), state.ref);
-      renderSvg.updateTrail(ship1Data, state.zoom, getRefObj(objs), state.ref, state);
-    }
+    state.render.zoom *= times;
+    state.render.zoom = Math.max(state.render.zoom, 1);
+    if (!state.play) renderUpdate();
   }
 
   function timeMultiply(times) {
@@ -177,7 +174,7 @@ var app = function(deps){
 var loadApp = (function() {
 
   var deps = {
-    renderSvg: renderSvg,
+    render: renderSvg,
     move: move,
     ship1: ship1,
     getPanel: getPanel,
