@@ -1,28 +1,25 @@
 
 let renderSvg = (helpCalc) => {
 
-  let canvasNode;
-  let viewCenter;
-  let burstNode;
-  let shipDec;
-
-  let init = (initState) => {
+  const init = (initState) => {
     initState.render = {
       refId: 'earth',
       refObjs: {},
-      zoom: 1
+      zoom: 1,
+      canvasNode: null,
+      initState: null
     }
-    canvasNode = document.getElementById('canvas');
-    viewCenter = getViewCenter(canvasNode);
+    initState.render.canvasNode  = document.getElementById('canvas'),
+    initState.render.viewCenter = getViewCenter(initState.render.canvasNode);
   }
 
-  let create = (objs, refObjs, stateRender) => {
+  const create = (objs, refObjs, stateRender) => {
     let keys = Object.keys(objs);
     keys.forEach(key => {
       let obj = objs[key];
       if (obj.objList) {
         obj.objList.forEach(obj => {
-          createObj(canvasNode, obj);
+          createObj(stateRender.canvasNode, obj);
         })
       }
     });
@@ -31,33 +28,35 @@ let renderSvg = (helpCalc) => {
 
   const createOne = (obj, refObjs, stateRender) => {
     obj.objList.forEach(obj => {
-      createObj(canvasNode, obj);
+      createObj(stateRender.canvasNode, obj);
+      if (obj.id === 'shipBurst') stateRender.burstNode = document.getElementById(obj.id);
+
     })
-    
-    updateObj(obj.objList[0], stateRender.zoom, refObjs, stateRender.refId)
+    updateObj(obj.objList[0], stateRender.zoom, refObjs, stateRender)
   }
 
   const updateOne = (obj, refObjs, stateRender) => {
-    updateObj(obj.objList[0], stateRender.zoom, refObjs, stateRender.refId);
-    shipDec = obj.objList[0].position.dec;
+    updateObj(obj.objList[0], stateRender.zoom, refObjs, stateRender);
   }
 
   const updateTrail = (obj, refObjs, stateRender, ship1) => {
     obj.objList[6].render.display = ship1.trail.display;
     const points = ship1.trail.points;
-    const trim = getTrim(stateRender.zoom, refObjs, stateRender.refId);
+    const shipDec = obj.objList[0].position.dec;
+
+    const trim = getTrim(stateRender.zoom, refObjs, stateRender.refId, stateRender.canvasNode, shipDec);
     let newPoints = '';
     for (let i = 0; i < points.length; i+=2) {
       const cart = helpCalc.fromPolar({
         r: points[i], 
         dec: points[i + 1]
       });
-      const x = viewCenter.x + trim.x + cart.x / stateRender.zoom;
-      const y = viewCenter.y + trim.y - cart.y / stateRender.zoom
+      const x = stateRender.viewCenter.x + trim.x + cart.x / stateRender.zoom;
+      const y = stateRender.viewCenter.y + trim.y - cart.y / stateRender.zoom
       newPoints += (x + ',' + y + ' ')
     }
     obj.objList[6].render.points = newPoints;
-    updateObj(obj.objList[6], stateRender.zoom, refObjs, stateRender.refId);
+    updateObj(obj.objList[6], stateRender.zoom, refObjs, stateRender);
   }
 
   const update = (objs, refObjs, stateRender) => {
@@ -65,9 +64,9 @@ let renderSvg = (helpCalc) => {
     keys.forEach(key => {
       let obj = objs[key];
 
-      if (obj.renderType === 'svg') updateObj(obj, stateRender.zoom, refObjs, stateRender.refId);
+      if (obj.renderType === 'svg') updateObj(obj, stateRender.zoom, refObjs, stateRender);
       obj.objList.forEach(obj => {
-        updateObj(obj, stateRender.zoom, refObjs, stateRender.refId);
+        updateObj(obj, stateRender.zoom, refObjs, stateRender);
       })
     });
   }
@@ -77,7 +76,6 @@ let renderSvg = (helpCalc) => {
   }
 
   function createObj(canvasNode, obj) {
-
     let parentNode;
     let svgns = 'http://www.w3.org/2000/svg';
     let newNode = document.createElementNS(svgns, obj.render.format);
@@ -116,17 +114,18 @@ let renderSvg = (helpCalc) => {
     }
 
     parentNode.appendChild(newNode);
-    if (obj.id === 'shipBurst') burstNode = newNode;
+    //if (obj.id === 'shipBurst') burstNode = newNode;
   }
 
   function updateObj(obj, zoom, refObjs, stateRender) {
     let node = document.getElementById(obj.id);
-
+    let viewCenter = stateRender.viewCenter;
+    const shipDec = obj.position ? obj.position.dec : {r: null, dec: null};
     const cart = helpCalc.fromPolar({
       r: obj.position ? obj.position.r : null,
       dec: obj.position ? obj.position.dec : null
     });
-    const trim = getTrim(zoom, refObjs, stateRender.refId);
+    const trim = getTrim(zoom, refObjs, stateRender.refId, stateRender.canvasNode, shipDec);
     const svgTag = obj.render.format;
     if (svgTag === 'circle') {
       node.setAttributeNS(null, 'cx', (viewCenter.x + trim.x + cart.x / zoom));
@@ -149,7 +148,7 @@ let renderSvg = (helpCalc) => {
       const transform = `translate(${x},${y}) rotate(${pitch},5,5)`;
       const visibility = obj.position.burst.a > 0 ?  'visible' : 'hidden';
       node.setAttributeNS(null, 'transform', transform);
-      burstNode.setAttributeNS(null, 'visibility', visibility);
+      if (stateRender.burstNode) stateRender.burstNode.setAttributeNS(null, 'visibility', visibility);
     }
   }
 
@@ -178,11 +177,11 @@ let renderSvg = (helpCalc) => {
     }
   }
 
-  function getTrim(zoom, refObjs, refId) {
+  function getTrim(zoom, refObjs, refId, canvasNode, shipDec) {
     const refCar = helpCalc.fromPolar({r: refObjs.position.r, dec: refObjs.position.dec})
     const canvasMinSize = Math.min(canvasNode.offsetWidth, canvasNode.offsetHeight) * zoom
     const refObjWidth = refObjs.r * 2;
-    
+
     let trim;
     const ratio = refObjWidth/canvasMinSize;
     const closeMinRatio = refId === 'moon' ? 1 : 5;
@@ -190,8 +189,8 @@ let renderSvg = (helpCalc) => {
       trim = {
         x: -refCar.x / zoom,
         y: refCar.y / zoom + refObjs.r / zoom + 200
-      } 
-    } else if (ratio < 1 || refId === 'moon') { // distant, center
+      }
+    } else if (ratio < 1) { // distant, center
       trim = {x: -refCar.x / zoom, y: refCar.y / zoom}
     } 
     else {
@@ -203,7 +202,6 @@ let renderSvg = (helpCalc) => {
       else if (shipDec > 135 && shipDec <= 225) trim = {x: trim.x, y: -trim.y} // bottom
       else if (shipDec > 225 && shipDec <= 325) trim = {x: trim.y, y: trim.x}; // left
     }
-
     return trim;
   }
 
