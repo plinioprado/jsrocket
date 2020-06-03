@@ -33,12 +33,13 @@ var app = function(deps){
   var ship1 = ship1Data.objList[0];
   var panel = deps.getPanel(helpCalc, state, ship1);
 
-  render.init(state)
-  ship1Data.init(state)
+  var refObjs = {earth: objs.earth.objList[2], moon: objs.moon.objList[0]}
+  render.init(state, refObjs);
+  ship1Data.init(state);
   move.init(objs);
 
-  render.create(objs, getRefObj(objs), state.render);
-  render.createOne(ship1Data, getRefObj(objs), state.render);
+  render.create(objs, getRefObj(), state.render);
+  render.createOne(ship1Data, getRefObj(), state.render);
 
   document.onclick = verifyClick;
   document.onkeydown = verifyKey;
@@ -72,9 +73,9 @@ var app = function(deps){
   }
 
   function renderUpdate() {
-    render.update(objs, getRefObj(objs), state.render);
-    render.updateOne(ship1Data, getRefObj(objs), state.render);
-    render.updateTrail(ship1Data, getRefObj(objs), state.render, state.ship1);
+    render.update(objs, getRefObj(), state.render, ship1);
+    render.updateOne(ship1Data, getRefObj(), state.render, ship1);
+    render.updateTrail(ship1Data, getRefObj(), state.render, ship1, state.ship1);
   }
 
   function checkTimeOut() {
@@ -128,11 +129,8 @@ var app = function(deps){
     }
   }
 
-  function getRefObj(objs) {
-    var obj = 'hey';
-    if (state.render.refId === 'earth') obj = objs.earth.objList[2];
-    else obj = objs.moon.objList[0];
-    return obj;
+  function getRefObj() {
+    return state.render.refObjs[state.render.refId];
   }
 
   function playStop() {
