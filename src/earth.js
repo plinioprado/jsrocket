@@ -17,7 +17,7 @@ var earth = {
 		{
 			id: 'earthAtm',
 			renderType: 'svg',
-			r: 6378100 + 200000,
+			r: 6378100 + 100000,
 			position: {
 				r: 0,
 				dec: 0
