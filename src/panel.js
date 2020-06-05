@@ -16,7 +16,7 @@ let getPanel = (helpCalc, state1, ship1) => {
     },
     long: function() {
       var long = state1.render.refId === 'earth' ? panel.headEarth : panel.headMoon;
-      return convLong((180  - long) % 360);
+      return formatLong((180  - long) % 360);
     },
     pitch: function() {
       var pitch = helpCalc.toDeg360(position.pitchDec - position.dec)
@@ -48,7 +48,7 @@ let getPanel = (helpCalc, state1, ship1) => {
     },
     scale: function() {
       var scale = state1.width / 10  * state1.render.zoom;
-      return convMkm(scale);g
+      return formatMkm(scale);g
     },
     time: function() {
       var d0 = new Date(0, 0, 0, 0, 0, 0, 0);
@@ -65,7 +65,7 @@ let getPanel = (helpCalc, state1, ship1) => {
       return zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k';
     },
     timeSpeed: function() {
-      return convKM(state1.timeSpeed);
+      return formatKM(state1.timeSpeed);
     },
     timePlay: function() {
       return state1.play ? 'Pause' : 'Play';
@@ -93,7 +93,7 @@ let getPanel = (helpCalc, state1, ship1) => {
     return txt;
   }
 
-  function convLong(deg) {
+  function formatLong(deg) {
     var txt = parseInt(deg) + String.fromCharCode(176);
     var min = ((deg - parseInt(deg)) * 60).toFixed(2);
     if (min < 10) txt += '0';
@@ -101,11 +101,11 @@ let getPanel = (helpCalc, state1, ship1) => {
     return txt;
   }
 
-  function convMkm(d) {
+  function formatMkm(d) {
     return (d < 1000) ? d + 'm' : d/1000 + 'km';
   }
 
-  function convKM(d) {
+  function formatKM(d) {
     var txt = d;
     if (d >= 1000) txt = parseInt(d/1000) + 'k';
     else if (d >= 1000000) txt = parseInt(d/1000000) + 'M';
