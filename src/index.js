@@ -22,7 +22,8 @@ var app = function(deps){
     timeSkip: 0.1, // each time loop timming (s)
     time: 0, // time passed (s)
     ship1: null,
-    render: null
+    render: null,
+    panel: null
   }
 
   var objs = deps.objs;
@@ -31,12 +32,12 @@ var app = function(deps){
   var render = deps.render(helpCalc);
   var ship1Data = deps.ship1(helpCalc);
   var ship1 = ship1Data.objList[0];
-  var panel = deps.getPanel(helpCalc, state, ship1);
 
   var refObjs = {earth: objs.earth.objList[2], moon: objs.moon.objList[0]}
   render.init(state, refObjs);
   ship1Data.init(state);
   move.init(objs);
+  var panel = deps.getPanel(helpCalc, state, ship1);
 
   render.create(objs, getRefObj(), state.render);
   render.createOne(ship1Data, getRefObj(), state.render);
@@ -52,7 +53,7 @@ var app = function(deps){
       // starts updating time because tracks how long this loop takes
       state.time += (state.timeSkip * state.timeSpeed);
 
-      // game over
+      // check if game over
       if (ship1.position.crash) modalOpen('ship crashed. Reload game.');
       if (ship1.position.crash || !state.play || checkTimeOut()) return;
 
@@ -61,7 +62,7 @@ var app = function(deps){
       ship1Data.burstUpdate(state.timeSkip, state.timeSpeed);
       move.moveOne(ship1, state.timeSkip, state.timeSpeed, [objs.earth.objList[2],objs.moon.objList[0]], state);
       renderUpdate();
-      panel.update();
+      panel.update(null, state);
 
       // skip for next regular loop
       state.timer = Date.now() - state.timerStart;
@@ -117,6 +118,7 @@ var app = function(deps){
     else if (keyCode === 'Equal') zoomMultiply(.5);
     else if (keyCode === 'Period') timeMultiply(2);
     else if (keyCode === 'Comma') timeMultiply(.5);
+    else if (keyCode === 'KeyN') panel.changeNav2Ref(state);
     else if (keyCode === 'KeyT') ship1Data.showTrail(state.ship1);
     else if (keyCode === 'KeyV') state.render.refId = render.setRef(state.render.refId);
     else if (keyCode.substring(0,5) === 'Digit') {
@@ -149,7 +151,7 @@ var app = function(deps){
   function timeMultiply(times) {
     var timeSpeed = state.timeSpeed * times;
     if (timeSpeed < 1) timeSpeed = 1;
-    if (timeSpeed > 2000) timeSpeed = 2000;
+    //if (timeSpeed > 2000) timeSpeed = 2000;
     state.timeSpeed = parseInt(timeSpeed);
     panel.update('timeSpeed');
   }

@@ -5,15 +5,15 @@ var getHelpCalc = () => {
     let dec = (Math.atan2(cart.x, cart.y) / (Math.PI/180)) % 360;
     if (dec < 0) dec+= 360
     return {
-      r: ((cart.x ** 2 + cart.y ** 2) ** .5),
-      dec: dec
+      r: Math.round((cart.x ** 2 + cart.y ** 2) ** .5),
+      dec: Math.round(dec * 1000000000) / 1000000000
     }
   }
 
   function fromPolar(polar) {
     return {
-      x: polar.r * Math.sin(polar.dec * Math.PI/180),
-      y: polar.r * Math.cos(polar.dec * Math.PI/180)
+      x: Math.round(polar.r * Math.sin(polar.dec * Math.PI/180)),
+      y: Math.round(polar.r * Math.cos(polar.dec * Math.PI/180))
     }
   }
 
@@ -24,6 +24,8 @@ var getHelpCalc = () => {
   const distPol = (obj1Pol, obj2Pol) => {
     const obj1Car = fromPolar(obj1Pol);
     const obj2Car = fromPolar(obj2Pol);
+
+    // don't use this dec
     const dist = {
       r: Math.sqrt(Math.abs(obj2Car.x - obj1Car.x) ** 2 + Math.abs(obj2Car.y - obj1Car.y) ** 2),
       dec: Math.atan((obj2Car.y - obj1Car.y) / (obj2Car.x - obj1Car.x)) / (Math.PI/180)
@@ -32,7 +34,7 @@ var getHelpCalc = () => {
     if (dist.r < 0) {
       dist = {
         r: -dist.r,
-        dev: (180 - dist.dec) % 360
+        dec: (180 - dist.dec) % 360
       }
     }
 
@@ -68,6 +70,23 @@ var getHelpCalc = () => {
     return ret;
   }
 
+  function vectorSub(obj1Pol, obj2Pol) {
+    const obj1PolInv = {r: obj1Pol.r, dec: (obj1Pol.dec + 180) % 360}
+    return vectorAdd(obj1PolInv, obj2Pol);
+  }
+
+  function vectorAdd(obj1Pol, obj2Pol) {
+    const obj1Car = fromPolar(obj1Pol);
+    const obj2Car = fromPolar(obj2Pol);
+    const r = Math.round(Math.sqrt((obj1Car.x + obj2Car.x) ** 2 + obj1Car.y + obj2Car.y) ** 2)
+    const dist = toPolar({x: (obj1Car.x + obj2Car.x), y: (obj1Car.y + obj2Car.y)})
+    
+    return {
+      r: Math.round(dist.r),
+      dec: Math.round(dist.dec * 1000000) / 1000000
+    }
+  }
+
   return {
     fromPolar,
     toPolar,
@@ -76,7 +95,9 @@ var getHelpCalc = () => {
     addPol,
     toDeg360,
     toDeg180,
-    getVObj
+    getVObj,
+    vectorAdd,
+    vectorSub
   }
 
 }
