@@ -56,6 +56,10 @@ var getHelpCalc = () => {
     return ret;
   }
 
+  function getGLocalR(dist, refMass) {
+    return 6.67e-11 * refMass / (dist ** 2);
+  }
+
   function getVObj(obj) {
     // for objs with vDec
     return {
@@ -96,6 +100,7 @@ var getHelpCalc = () => {
     toDeg360,
     toDeg180,
     getVObj,
+    getGLocalR,
     vectorAdd,
     vectorSub
   }
