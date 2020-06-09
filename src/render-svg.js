@@ -69,8 +69,11 @@ let renderSvg = (helpCalc) => {
     });
   }
 
-  const setRef = (ref) => {
-    return ref === 'earth' ? 'moon' : 'earth';
+  const setRef = (renderState) => {
+    const keys = Object.keys(renderState.refObjs);
+    let index = keys.indexOf(renderState.refId);
+    if (++index >= keys.length) index = 0;
+    return keys[index];
   }
 
   function createObj(canvasNode, obj) {
@@ -112,7 +115,6 @@ let renderSvg = (helpCalc) => {
     }
 
     parentNode.appendChild(newNode);
-    //if (obj.id === 'shipBurst') burstNode = newNode;
   }
 
   function updateObj(obj, refObj, stateRender, ship1) {

@@ -33,7 +33,11 @@ var app = function(deps){
   var ship1Data = deps.ship1(helpCalc);
   var ship1 = ship1Data.objList[0];
 
-  var refObjs = {earth: objs.earth.objList[2], moon: objs.moon.objList[0]}
+  var refObjs = {
+    earth: objs.earth.objList[2],
+    moon: objs.moon.objList[0],
+    iss: objs.iss.objList[0]
+  }
   render.init(state, refObjs);
   ship1Data.init(state);
   move.init(objs);
@@ -50,7 +54,7 @@ var app = function(deps){
 
   function loop() {
     setTimeout(function() {
-      // starts updating time because tracks how long this loop takes
+      // start updating time because tracks how long this loop takes
       state.time += (state.timeSkip * state.timeSpeed);
 
       // check if game over
@@ -120,7 +124,7 @@ var app = function(deps){
     else if (keyCode === 'Comma') timeMultiply(.5);
     else if (keyCode === 'KeyN') panel.changeNav2Ref(state);
     else if (keyCode === 'KeyT') ship1Data.showTrail(state.ship1);
-    else if (keyCode === 'KeyV') state.render.refId = render.setRef(state.render.refId);
+    else if (keyCode === 'KeyV') state.render.refId = render.setRef(state.render);
     else if (keyCode.substring(0,5) === 'Digit') {
       ship1Data.setBurstANext(keyCode.replace('Digit', ''))
     }
@@ -151,7 +155,7 @@ var app = function(deps){
   function timeMultiply(times) {
     var timeSpeed = state.timeSpeed * times;
     if (timeSpeed < 1) timeSpeed = 1;
-    //if (timeSpeed > 2000) timeSpeed = 2000;
+    if (timeSpeed > 2000) timeSpeed = 2000;
     state.timeSpeed = parseInt(timeSpeed);
     panel.update('timeSpeed');
   }
