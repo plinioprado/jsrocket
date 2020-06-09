@@ -9,6 +9,7 @@ let moveSvg = (helpCalc) => {
       let objList = objs[keys[i]].objList;
       for (let j = 0; j < objList.length; j++) {
         let obj = objList[j];
+        if (!obj.position) continue;
         if (obj.position.vR || obj.position.vDec) { // will move
           const newData = obj.position;
           newData.id = obj.id;

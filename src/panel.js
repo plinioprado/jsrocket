@@ -1,8 +1,6 @@
 
 let getPanel = (helpCalc, state, ship1) => {
 
-  var position = {};
-  var panel = {}
   var content = {
     scale: function() {
       var scale = state.width / 10  * state.render.zoom;
@@ -14,16 +12,6 @@ let getPanel = (helpCalc, state, ship1) => {
       d.setSeconds(state.time);
       var days = parseInt((d - d0) / (1000 * 60 * 60 * 24));
       return days + 'd ' + d.toLocaleTimeString('en-US', { hour12: false });
-    },
-    zoom: function() {
-      var zoom  = state.render.zoom
-      return zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k';
-    },
-    timeSpeed: function() {
-      return formatKM(state.timeSpeed);
-    },
-    timePlay: function() {
-      return state.play ? 'Pause' : 'Play';
     }
   }
 
@@ -34,27 +22,37 @@ let getPanel = (helpCalc, state, ship1) => {
       shared: {
         node: null
       },
-      thrust: {
+      View: {
+        zoom: (state) => {
+          var zoom  = state.render.zoom
+          return (zoom < 1000 ? zoom : Math.round(zoom / 1000) + 'k') + ':1';
+        },
+        timeSpeed: (state) => {
+          return formatKM(state.timeSpeed);
+        },
+      },
+      Thrust: {
         thrust: () => {
           var a = (ship1.position.burst.a / 9.8).toFixed(0);
           var aNext = (ship1.position.burst.aNext / 9.8).toFixed(0);
           return a + 'g (' + aNext + 'g)';
         },
-        time: () => position.burst.t.toFixed(0) + 's (' + position.burst.tNext.toFixed(0) + 's)'
+        time: () => ship1.position.burst.t.toFixed(0) + 's (' + ship1.position.burst.tNext.toFixed(0) + 's)'
       },
       FDAI: {
-        speed: () => (ship1.position.vR * 3.6).toFixed(0).toLocaleString() + 'km/h',
+        //speed: () => (ship1.position.vR * 3.6).toFixed(0).toLocaleString() + 'km/h',
+        speed: () => formatSpeed(ship1.position.vR),
         head: () => formatDeg(ship1.position.vDec),
         pitch: () => {
           var pitch = helpCalc.toDeg360(ship1.position.pitchDec - ship1.position.dec)
           return formatDeg(helpCalc.toDeg180(90 - pitch ))
         }
       },
-      nav2: {
+      Nav2: {
         ref: 'earth',
         dec: (state) => {
           const postShip = {r: ship1.position.r, dec: ship1.position.dec};
-          const navRefId = state.panel.nav2.ref;
+          const navRefId = state.panel.Nav2.ref;
           const refObj = state.render.refObjs[navRefId].position;
           const posNavRef = {r: refObj.r, dec: refObj.dec};
           const dist = helpCalc.vectorSub(postShip, posNavRef)
@@ -62,14 +60,14 @@ let getPanel = (helpCalc, state, ship1) => {
         },
         dist: (state) => {
           const postShip = {r: ship1.position.r, dec: ship1.position.dec};
-          const navRefId = state.panel.nav2.ref;
+          const navRefId = state.panel.Nav2.ref;
           const refObj = state.render.refObjs[navRefId];
           const posNavRef = {r: refObj.position.r, dec: refObj.position.dec};
           const dist = helpCalc.vectorSub(postShip, posNavRef);
           return formatMkm(dist.r - refObj.r);
         }
       },
-      nav: {
+      Nav: {
         ref: (state) => state.render.refId,
         alt: (state) => {
           const posShip = {r: ship1.position.r, dec: ship1.position.dec};
@@ -84,12 +82,12 @@ let getPanel = (helpCalc, state, ship1) => {
         vClimb: (state) => {
           //const refObj = state.render.refObjs[state.render.refId];
           const climb = ship1.position.vR * Math.cos(ship1.position.vDec * (Math.PI/180));
-          return (climb * 3.6).toFixed(0) + 'km/h'
+          return formatSpeed(climb);
         },
         vOrb: (state) => {
           //const refObj = state.render.refObjs[state.render.refId];
           const vOrb = ship1.position.vR * Math.sin(ship1.position.vDec * (Math.PI/180));
-          return (vOrb * 3.6).toFixed(0) + 'km/h'
+          return formatSpeed(vOrb);
         },
         gLocal: (state) => {
           const posShip = {r: ship1.position.r, dec: ship1.position.dec};
@@ -120,8 +118,6 @@ let getPanel = (helpCalc, state, ship1) => {
       }
     } else {
       // from content
-      position = ship1.position;
-      panel = ship1.panel;
       var keys = Object.keys(content);
       keys.forEach(function(element) {
         document.getElementById(element).innerText = content[element]();
@@ -153,6 +149,10 @@ let getPanel = (helpCalc, state, ship1) => {
     if (min < 10) txt += '0';
     txt += min + '\'';
     return txt;
+  }
+
+  function formatSpeed(v) {
+    return Math.round(v * 3.6).toLocaleString() + 'km/h';
   }
 
   function formatMkm(d) {
@@ -199,8 +199,10 @@ let getPanel = (helpCalc, state, ship1) => {
   }
 
   function changeNav2Ref(state) {
-    if (state.panel.nav2.ref === 'earth') state.panel.nav2.ref = 'moon';
-    else state.panel.nav2.ref = 'earth';
+    const keys = Object.keys(state.render.refObjs);
+    let index = keys.indexOf(state.panel.nav2.ref);
+    if (++index >= keys.length) index = 0;
+    state.panel.nav2.ref = keys[index];
   }
 
   return {
